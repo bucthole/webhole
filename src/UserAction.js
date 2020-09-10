@@ -387,7 +387,7 @@ class ResetUsertokenWidget extends Component {
 
 export class LoginForm extends Component {
   copy_token(token) {
-    if (copy(token)) alert('复制成功！\n请一定不要泄露哦');
+    if (copy(token)) alert('复制成功！\n请一定不要泄露给其他人，或在thuhole.com以外的其他网站中输入token，否则可能会导致信息泄漏哦');
   }
 
   render() {
