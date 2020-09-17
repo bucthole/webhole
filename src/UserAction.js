@@ -469,16 +469,163 @@ export class LoginForm extends Component {
   }
 }
 
-export class ReplyForm extends Component {
+// export class ReplyForm extends Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       text: '',
+//       loading_status: 'done',
+//       preview: false,
+//     };
+//     this.on_change_bound = this.on_change.bind(this);
+//     this.area_ref = this.props.area_ref || React.createRef();
+//     this.global_keypress_handler_bound = this.global_keypress_handler.bind(
+//       this,
+//     );
+//     this.color_picker = new ColorPicker();
+//   }
+//
+//   global_keypress_handler(e) {
+//     if (
+//       e.code === 'Enter' &&
+//       !e.ctrlKey &&
+//       !e.altKey &&
+//       ['input', 'textarea'].indexOf(e.target.tagName.toLowerCase()) === -1
+//     ) {
+//       if (this.area_ref.current) {
+//         e.preventDefault();
+//         this.area_ref.current.focus();
+//       }
+//     }
+//   }
+//   componentDidMount() {
+//     document.addEventListener('keypress', this.global_keypress_handler_bound);
+//   }
+//   componentWillUnmount() {
+//     document.removeEventListener(
+//       'keypress',
+//       this.global_keypress_handler_bound,
+//     );
+//   }
+//
+//   on_change(value) {
+//     this.setState({
+//       text: value,
+//     });
+//   }
+//
+//   on_submit(event) {
+//     if (event) event.preventDefault();
+//     if (this.state.loading_status === 'loading') return;
+//     this.setState({
+//       loading_status: 'loading',
+//     });
+//
+//     let data = new URLSearchParams();
+//     data.append('pid', this.props.pid);
+//     data.append('text', this.state.text);
+//     data.append('user_token', this.props.token);
+//     fetch(
+//       API_BASE + '/api.php?action=docomment' + token_param(this.props.token),
+//       {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/x-www-form-urlencoded',
+//         },
+//         body: data,
+//       },
+//     )
+//       .then(get_json)
+//       .then((json) => {
+//         if (json.code !== 0) {
+//           if (json.msg) alert(json.msg);
+//           throw new Error(JSON.stringify(json));
+//         }
+//
+//         this.setState({
+//           loading_status: 'done',
+//           text: '',
+//           preview: false,
+//         });
+//         this.area_ref.current.clear();
+//         this.props.on_complete();
+//       })
+//       .catch((e) => {
+//         console.error(e);
+//         alert('回复失败');
+//         this.setState({
+//           loading_status: 'done',
+//         });
+//       });
+//   }
+//
+//   toggle_preview() {
+//     this.setState({
+//       preview: !this.state.preview,
+//     });
+//   }
+//
+//   render() {
+//     return (
+//       <form
+//         onSubmit={this.on_submit.bind(this)}
+//         className={'reply-form box' + (this.state.text ? ' reply-sticky' : '')}
+//       >
+//         {this.state.preview ? (
+//           <div className="reply-preview">
+//             <HighlightedMarkdown
+//               text={this.state.text}
+//               color_picker={this.color_picker}
+//               show_pid={() => {}}
+//             />
+//           </div>
+//         ) : (
+//           <SafeTextarea
+//             ref={this.area_ref}
+//             id={this.props.pid}
+//             on_change={this.on_change_bound}
+//             on_submit={this.on_submit.bind(this)}
+//           />
+//         )}
+//         <button
+//           type="button"
+//           onClick={() => {
+//             this.toggle_preview();
+//           }}
+//         >
+//           {this.state.preview ? (
+//             <span className="icon icon-eye-blocked" />
+//           ) : (
+//             <span className="icon icon-eye" />
+//           )}
+//         </button>
+//         {this.state.loading_status === 'loading' ? (
+//           <button disabled="disabled">
+//             <span className="icon icon-loading" />
+//           </button>
+//         ) : (
+//           <button type="submit">
+//             <span className="icon icon-send" />
+//           </button>
+//         )}
+//       </form>
+//     );
+//   }
+// }
+
+export class PostForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
       text: '',
       loading_status: 'done',
+      img_tip: null,
       preview: false,
     };
-    this.on_change_bound = this.on_change.bind(this);
+    this.img_ref = React.createRef();
     this.area_ref = this.props.area_ref || React.createRef();
+    this.on_change_bound = this.on_change.bind(this);
+    this.on_img_change_bound = this.on_img_change.bind(this);
     this.global_keypress_handler_bound = this.global_keypress_handler.bind(
       this,
     );
@@ -514,145 +661,28 @@ export class ReplyForm extends Component {
     });
   }
 
-  on_submit(event) {
-    if (event) event.preventDefault();
-    if (this.state.loading_status === 'loading') return;
-    this.setState({
-      loading_status: 'loading',
-    });
-
+  do_post(text, img) {
     let data = new URLSearchParams();
-    data.append('pid', this.props.pid);
+    if (this.props.action === 'docomment') {
+      data.append('pid', this.props.pid);
+    }
     data.append('text', this.state.text);
+    data.append('type', img ? 'image' : 'text');
     data.append('user_token', this.props.token);
+    if (img) data.append('data', img);
+
     fetch(
-      API_BASE + '/api.php?action=docomment' + token_param(this.props.token),
+      API_BASE +
+        '/api.php?action=' +
+        this.props.action +
+        token_param(this.props.token),
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: data,
-      },
-    )
-      .then(get_json)
-      .then((json) => {
-        if (json.code !== 0) {
-          if (json.msg) alert(json.msg);
-          throw new Error(JSON.stringify(json));
-        }
-
-        this.setState({
-          loading_status: 'done',
-          text: '',
-          preview: false,
-        });
-        this.area_ref.current.clear();
-        this.props.on_complete();
       })
-      .catch((e) => {
-        console.error(e);
-        alert('回复失败');
-        this.setState({
-          loading_status: 'done',
-        });
-      });
-  }
-
-  toggle_preview() {
-    this.setState({
-      preview: !this.state.preview,
-    });
-  }
-
-  render() {
-    return (
-      <form
-        onSubmit={this.on_submit.bind(this)}
-        className={'reply-form box' + (this.state.text ? ' reply-sticky' : '')}
-      >
-        {this.state.preview ? (
-          <div className="reply-preview">
-            <HighlightedMarkdown
-              text={this.state.text}
-              color_picker={this.color_picker}
-              show_pid={() => {}}
-            />
-          </div>
-        ) : (
-          <SafeTextarea
-            ref={this.area_ref}
-            id={this.props.pid}
-            on_change={this.on_change_bound}
-            on_submit={this.on_submit.bind(this)}
-          />
-        )}
-        <button
-          type="button"
-          onClick={() => {
-            this.toggle_preview();
-          }}
-        >
-          {this.state.preview ? (
-            <span className="icon icon-eye-blocked" />
-          ) : (
-            <span className="icon icon-eye" />
-          )}
-        </button>
-        {this.state.loading_status === 'loading' ? (
-          <button disabled="disabled">
-            <span className="icon icon-loading" />
-          </button>
-        ) : (
-          <button type="submit">
-            <span className="icon icon-send" />
-          </button>
-        )}
-      </form>
-    );
-  }
-}
-
-export class PostForm extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      text: '',
-      loading_status: 'done',
-      img_tip: null,
-      preview: false,
-    };
-    this.img_ref = React.createRef();
-    this.area_ref = React.createRef();
-    this.on_change_bound = this.on_change.bind(this);
-    this.on_img_change_bound = this.on_img_change.bind(this);
-    this.color_picker = new ColorPicker();
-  }
-
-  componentDidMount() {
-    if (this.area_ref.current) this.area_ref.current.focus();
-  }
-
-  on_change(value) {
-    this.setState({
-      text: value,
-    });
-  }
-
-  do_post(text, img) {
-    let data = new URLSearchParams();
-    data.append('text', this.state.text);
-    data.append('type', img ? 'image' : 'text');
-    data.append('user_token', this.props.token);
-    if (img) data.append('data', img);
-
-    fetch(API_BASE + '/api.php?action=dopost' + token_param(this.props.token), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: data,
-    })
       .then(get_json)
       .then((json) => {
         if (json.code !== 0) {
@@ -824,11 +854,18 @@ export class PostForm extends Component {
   }
 
   render() {
+    let replyClassName =
+      'reply-form box' + (this.state.text ? ' reply-sticky' : '');
     return (
-      <form onSubmit={this.on_submit.bind(this)} className="post-form box">
+      <form
+        onSubmit={this.on_submit.bind(this)}
+        className={
+          this.props.action === 'dopost' ? 'post-form box' : replyClassName
+        }
+      >
         <div className="post-form-bar">
           <label>
-            图片
+            <a>上传图片</a>
             <input
               ref={this.img_ref}
               type="file"
@@ -887,7 +924,7 @@ export class PostForm extends Component {
           </p>
         )}
         {this.state.preview ? (
-          <div className="post-preview">
+          <div className={this.props.action === 'dopost' ? "post-preview" : "reply-preview"}>
             <HighlightedMarkdown
               text={this.state.text}
               color_picker={this.color_picker}
@@ -897,20 +934,22 @@ export class PostForm extends Component {
         ) : (
           <SafeTextarea
             ref={this.area_ref}
-            id="new_post"
+            id={this.props.pid}
             on_change={this.on_change_bound}
             on_submit={this.on_submit.bind(this)}
           />
         )}
-        <p>
-          <small>
-            请遵守
-            <a href="https://thuhole.com/policy.html" target="_blank">
-              树洞管理规范（试行）
-            </a>
-            ，文明发言
-          </small>
-        </p>
+        {this.props.action === 'dopost' && (
+          <p>
+            <small>
+              请遵守
+              <a href="https://thuhole.com/policy.html" target="_blank">
+                树洞管理规范（试行）
+              </a>
+              ，文明发言
+            </small>
+          </p>
+        )}
       </form>
     );
   }

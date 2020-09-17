@@ -144,6 +144,8 @@ class ControlBar extends PureComponent {
                     '发表树洞',
                     <PostForm
                       token={token}
+                      action={'dopost'}
+                      pid={'new_post'}
                       on_complete={() => {
                         this.props.show_sidebar(null, null, 'clear');
                         this.do_refresh();
