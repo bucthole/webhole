@@ -865,7 +865,11 @@ export class PostForm extends Component {
       >
         <div className="post-form-bar">
           <label>
-            <a>上传图片</a>
+            {/*<a>上传图片</a>*/}
+            <span className={'post-upload'}>
+              <span className="icon icon-upload" />
+              &nbsp;插入图片
+            </span>
             <input
               ref={this.img_ref}
               type="file"

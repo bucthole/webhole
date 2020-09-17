@@ -113,3 +113,14 @@
 input[type="file"] {
     display: none;
 }
+
+.post-upload {
+    padding: .3em .5em;
+    cursor: pointer;
+    opacity: 1;
+    background-color: #fcfcfc;
+    box-shadow: 0 0 3px rgba(0,0,0,.5);
+    border-radius: 1em;
+    color: var(--var-link-color);
+}
+

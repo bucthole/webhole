@@ -151,11 +151,23 @@ class Reply extends PureComponent {
           />
           {this.props.info.type === 'image' && (
             <p className="img">
-              <a
-                className="no-underline"
-                href={IMAGE_BASE + this.props.info.url}
-                target="_blank"
-              >
+              {this.props.img_clickable ? (
+                <a
+                  className="no-underline"
+                  href={IMAGE_BASE + this.props.info.url}
+                  target="_blank"
+                >
+                  <img
+                    src={IMAGE_BASE + this.props.info.url}
+                    onError={(e) => {
+                      if (e.target.src === IMAGE_BASE + this.props.info.url) {
+                        e.target.src = IMAGE_BAK_BASE + this.props.info.url;
+                      }
+                    }}
+                    alt={IMAGE_BASE + this.props.info.url}
+                  />
+                </a>
+              ) : (
                 <img
                   src={IMAGE_BASE + this.props.info.url}
                   onError={(e) => {
@@ -165,7 +177,7 @@ class Reply extends PureComponent {
                   }}
                   alt={IMAGE_BASE + this.props.info.url}
                 />
-              </a>
+              )}
             </p>
           )}
         </div>
@@ -628,6 +640,7 @@ class FlowSidebar extends PureComponent {
                 set_variant={(variant) => {
                   this.set_variant(reply.cid, variant);
                 }}
+                img_clickable={true}
                 do_filter_name={
                   replies_cnt[reply.name] > 1
                     ? this.set_filter_name.bind(this)
@@ -833,6 +846,7 @@ class FlowItemRow extends PureComponent {
             <Reply
               key={reply.cid}
               info={reply}
+              img_clickable={false}
               color_picker={this.color_picker}
               show_pid={show_pid}
             />
