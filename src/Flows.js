@@ -21,7 +21,7 @@ import {
 import './Flows.css';
 import LazyLoad, { forceCheck } from './react-lazyload/src';
 import { AudioWidget } from './AudioWidget';
-import { TokenCtx, ReplyForm } from './UserAction';
+import {TokenCtx, ReplyForm, PostForm} from './UserAction';
 
 import { API } from './flows_api';
 
@@ -149,6 +149,25 @@ class Reply extends PureComponent {
             color_picker={this.props.color_picker}
             show_pid={this.props.show_pid}
           />
+          {this.props.info.type === 'image' && (
+            <p className="img">
+              <a
+                className="no-underline"
+                href={IMAGE_BASE + this.props.info.url}
+                target="_blank"
+              >
+                <img
+                  src={IMAGE_BASE + this.props.info.url}
+                  onError={(e) => {
+                    if (e.target.src === IMAGE_BASE + this.props.info.url) {
+                      e.target.src = IMAGE_BAK_BASE + this.props.info.url;
+                    }
+                  }}
+                  alt={IMAGE_BASE + this.props.info.url}
+                />
+              </a>
+            </p>
+          )}
         </div>
       </div>
     );
@@ -620,9 +639,10 @@ class FlowSidebar extends PureComponent {
         ))}
         {this.state.rev && main_thread_elem}
         {this.props.token ? (
-          <ReplyForm
+          <PostForm
             pid={this.state.info.pid}
             token={this.props.token}
+            action={'docomment'}
             area_ref={this.reply_ref}
             on_complete={this.load_replies.bind(this)}
           />
