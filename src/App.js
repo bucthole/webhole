@@ -7,8 +7,7 @@ import { TokenCtx } from './UserAction';
 import { load_config, bgimg_style } from './Config';
 import { listen_darkmode } from './infrastructure/functions';
 import { LoginPopup, TitleLine } from './infrastructure/widgets';
-import React, {Component} from 'react';
-import {cache} from './cache';
+import { cache } from './cache';
 
 const MAX_SIDEBAR_STACK_SIZE = 10;
 
