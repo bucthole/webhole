@@ -223,7 +223,7 @@ export function InfoSidebar(props) {
         &nbsp;&nbsp;
         <a href="https://thuhole.com/policy.html" target="_blank">
           <span className="icon icon-textfile" />
-          <label>树洞规范（试行）</label>
+          <label>树洞规范</label>
         </a>
         &nbsp;&nbsp;
         <a
@@ -946,11 +946,10 @@ export class PostForm extends Component {
         {this.props.action === 'dopost' && (
           <p>
             <small>
-              请遵守
+              发帖前请阅读并同意
               <a href="https://thuhole.com/policy.html" target="_blank">
-                树洞管理规范（试行）
+                树洞规范
               </a>
-              ，文明发言
             </small>
           </p>
         )}
