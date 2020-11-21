@@ -45,9 +45,9 @@ const FOLD_TAGS = [
   // '用户举报较多',
   '举报较多',
   '重复内容',
-  // '引战',
-  // '未经证实的传闻',
-  // '令人不适',
+  '引战',
+  '未经证实的传闻',
+  '令人不适',
 ];
 
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
