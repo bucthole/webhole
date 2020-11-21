@@ -218,7 +218,7 @@ export class HighlightedMarkdown extends Component {
       },
     ];
     const parser = new HtmlToReact.Parser();
-    if (props.author && props.text.match(/^(?:#+ |>|```|\t|\s*-|\s*\d+\.)/)) {
+    if (props.author && props.text.match(/^(?:#+ |\$\$|>|```|\t|\s*-|\s*\d+\.)/)) {
       const renderedMarkdown = renderMd(props.text);
       return (
         <>
