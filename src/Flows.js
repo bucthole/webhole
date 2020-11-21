@@ -20,8 +20,8 @@ import {
 } from './Common';
 import './Flows.css';
 import LazyLoad, { forceCheck } from './react-lazyload/src';
-import { AudioWidget } from './AudioWidget';
-import {TokenCtx, ReplyForm, PostForm} from './UserAction';
+// import { AudioWidget } from './AudioWidget';
+import { TokenCtx, ReplyForm, PostForm } from './UserAction';
 
 import { API } from './flows_api';
 
@@ -36,15 +36,18 @@ const QUOTE_BLACKLIST = [];
 const FOLD_TAGS = [
   '性相关',
   '政治相关',
-  '性话题',
-  '政治话题',
+  // '性话题',
+  // '政治话题',
   '折叠',
   'NSFW',
   '刷屏',
   '真实性可疑',
-  '用户举报较多',
+  // '用户举报较多',
   '举报较多',
   '重复内容',
+  // '引战',
+  // '未经证实的传闻',
+  // '令人不适',
 ];
 
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
@@ -208,7 +211,12 @@ class FlowItem extends PureComponent {
           this.props.info.likenum
         }关注 ${this.props.info.reply}回复）\n` +
         this.props.replies
-          .map((r) => (r.tag ? '【' + r.tag + '】' : '') + r.text)
+          .map(
+            (r) =>
+              (r.tag ? '【' + r.tag + '】' : '') +
+              r.text +
+              (r.type === 'image' ? ' [图片]' : ''),
+          )
           .join('\n'),
     );
   }
@@ -452,6 +460,10 @@ class FlowSidebar extends PureComponent {
     if (reason !== null) {
       API.report(this.state.info.pid, reason, this.props.token)
         .then((json) => {
+          if (json.code !== 0) {
+            // if (json.msg) alert(json.msg);
+            throw new Error(JSON.stringify(json));
+          }
           alert('举报成功');
         })
         .catch((e) => {
@@ -898,11 +910,16 @@ class FlowItemRow extends PureComponent {
                 )}
                 <code className="box-id">#{this.props.info.pid}</code>
                 &nbsp;
-                {this.props.info.tag !== null && this.props.info.tag !== '折叠' && (
-                  <span className="box-header-tag">{this.props.info.tag}</span>
-                )}
+                {this.props.info.tag !== null &&
+                  this.props.info.tag !== '折叠' && (
+                    <span className="box-header-tag">
+                      {this.props.info.tag}
+                    </span>
+                  )}
                 <Time stamp={this.props.info.timestamp} short={true} />
-                <span className="box-header-badge">{this.needFold ? '已隐藏' : '已屏蔽'}</span>
+                <span className="box-header-badge">
+                  {this.needFold ? '已隐藏' : '已屏蔽'}
+                </span>
                 <div style={{ clear: 'both' }} />
               </div>
             </div>

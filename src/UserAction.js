@@ -13,9 +13,9 @@ import fixOrientation from 'fix-orientation';
 import copy from 'copy-to-clipboard';
 import { cache } from './cache';
 import {
-  API_VERSION_PARAM,
-  THUHOLE_API_ROOT,
-  API,
+  // API_VERSION_PARAM,
+  // THUHOLE_API_ROOT,
+  // API,
   get_json,
   token_param,
 } from './flows_api';
@@ -320,74 +320,77 @@ export function InfoSidebar(props) {
   );
 }
 
-class ResetUsertokenWidget extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading_status: 'done',
-    };
-  }
-
-  do_reset() {
-    if (
-      window.confirm(
-        '您正在重置 UserToken！\n您的账号将会在【所有设备】上注销，您需要手动重新登录！',
-      )
-    ) {
-      let uid = window.prompt(
-        '您正在重置 UserToken！\n请输入您的学号以确认身份：',
-      );
-      if (uid)
-        this.setState(
-          {
-            loading_status: 'loading',
-          },
-          () => {
-            fetch(THUHOLE_API_ROOT + 'api_xmcp/hole/reset_usertoken', {
-              method: 'post',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                user_token: this.props.token,
-                uid: uid,
-              }),
-            })
-              .then(get_json)
-              .then((json) => {
-                if (json.error) throw new Error(json.error);
-                else alert('重置成功！您需要在所有设备上重新登录。');
-
-                this.setState({
-                  loading_status: 'done',
-                });
-              })
-              .catch((e) => {
-                alert('重置失败：' + e);
-                this.setState({
-                  loading_status: 'done',
-                });
-              });
-          },
-        );
-    }
-  }
-
-  render() {
-    if (this.state.loading_status === 'done')
-      return <a onClick={this.do_reset.bind(this)}>重置</a>;
-    else if (this.state.loading_status === 'loading')
-      return (
-        <a>
-          <span className="icon icon-loading" />
-        </a>
-      );
-  }
-}
+// class ResetUsertokenWidget extends Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       loading_status: 'done',
+//     };
+//   }
+//
+//   do_reset() {
+//     if (
+//       window.confirm(
+//         '您正在重置 UserToken！\n您的账号将会在【所有设备】上注销，您需要手动重新登录！',
+//       )
+//     ) {
+//       let uid = window.prompt(
+//         '您正在重置 UserToken！\n请输入您的学号以确认身份：',
+//       );
+//       if (uid)
+//         this.setState(
+//           {
+//             loading_status: 'loading',
+//           },
+//           () => {
+//             fetch(THUHOLE_API_ROOT + 'api_xmcp/hole/reset_usertoken', {
+//               method: 'post',
+//               headers: {
+//                 'Content-Type': 'application/json',
+//               },
+//               body: JSON.stringify({
+//                 user_token: this.props.token,
+//                 uid: uid,
+//               }),
+//             })
+//               .then(get_json)
+//               .then((json) => {
+//                 if (json.error) throw new Error(json.error);
+//                 else alert('重置成功！您需要在所有设备上重新登录。');
+//
+//                 this.setState({
+//                   loading_status: 'done',
+//                 });
+//               })
+//               .catch((e) => {
+//                 alert('重置失败：' + e);
+//                 this.setState({
+//                   loading_status: 'done',
+//                 });
+//               });
+//           },
+//         );
+//     }
+//   }
+//
+//   render() {
+//     if (this.state.loading_status === 'done')
+//       return <a onClick={this.do_reset.bind(this)}>重置</a>;
+//     else if (this.state.loading_status === 'loading')
+//       return (
+//         <a>
+//           <span className="icon icon-loading" />
+//         </a>
+//       );
+//   }
+// }
 
 export class LoginForm extends Component {
   copy_token(token) {
-    if (copy(token)) alert('复制成功！\n请一定不要泄露给其他人，或在thuhole.com以外的其他网站中输入token，否则可能会导致信息泄漏哦');
+    if (copy(token))
+      alert(
+        '复制成功！\n请一定不要泄露给其他人，或在thuhole.com以外的其他网站中输入token，否则可能会导致信息泄漏哦',
+      );
   }
 
   render() {
@@ -682,7 +685,8 @@ export class PostForm extends Component {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: data,
-      })
+      },
+    )
       .then(get_json)
       .then((json) => {
         if (json.code !== 0) {
