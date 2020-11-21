@@ -21,34 +21,36 @@ import {
 import './Flows.css';
 import LazyLoad, { forceCheck } from './react-lazyload/src';
 // import { AudioWidget } from './AudioWidget';
-import { TokenCtx, ReplyForm, PostForm } from './UserAction';
+import {TokenCtx, ReplyForm, PostForm, DoUpdate} from './UserAction';
 
 import { API } from './flows_api';
+import {cache} from "./cache";
 
-const IMAGE_BASE = 'https://thimg.yecdn.com/';
-const IMAGE_BAK_BASE = 'https://img2.thuhole.com/';
+// const localStorage['img_base_url'] = 'https://thimg.yecdn.com/';
+// const localStorage['img_base_url_bak'] = 'https://img2.thuhole.com/';
 // const AUDIO_BASE=THUHOLE_API_ROOT+'services/thuhole/audios/';
 
 const CLICKABLE_TAGS = { a: true, audio: true };
 const PREVIEW_REPLY_COUNT = 10;
 // const QUOTE_BLACKLIST=['23333','233333','66666','666666','10086','10000','100000','99999','999999','55555','555555'];
 const QUOTE_BLACKLIST = [];
-const FOLD_TAGS = [
-  '性相关',
-  '政治相关',
-  // '性话题',
-  // '政治话题',
-  '折叠',
-  'NSFW',
-  '刷屏',
-  '真实性可疑',
-  // '用户举报较多',
-  '举报较多',
-  '重复内容',
-  '引战',
-  '未经证实的传闻',
-  '令人不适',
-];
+let fold_tags = [];
+// const FOLD_TAGS = [
+//   '性相关',
+//   '政治相关',
+//   // '性话题',
+//   // '政治话题',
+//   '折叠',
+//   'NSFW',
+//   '刷屏',
+//   '真实性可疑',
+//   // '用户举报较多',
+//   '举报较多',
+//   '重复内容',
+//   '引战',
+//   '未经证实的传闻',
+//   '令人不适',
+// ];
 
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
 
@@ -157,28 +159,28 @@ class Reply extends PureComponent {
               {this.props.img_clickable ? (
                 <a
                   className="no-underline"
-                  href={IMAGE_BASE + this.props.info.url}
+                  href={localStorage['img_base_url'] + this.props.info.url}
                   target="_blank"
                 >
                   <img
-                    src={IMAGE_BASE + this.props.info.url}
+                    src={localStorage['img_base_url'] + this.props.info.url}
                     onError={(e) => {
-                      if (e.target.src === IMAGE_BASE + this.props.info.url) {
-                        e.target.src = IMAGE_BAK_BASE + this.props.info.url;
+                      if (e.target.src === localStorage['img_base_url'] + this.props.info.url) {
+                        e.target.src = localStorage['img_base_url_bak'] + this.props.info.url;
                       }
                     }}
-                    alt={IMAGE_BASE + this.props.info.url}
+                    alt={localStorage['img_base_url'] + this.props.info.url}
                   />
                 </a>
               ) : (
                 <img
-                  src={IMAGE_BASE + this.props.info.url}
+                  src={localStorage['img_base_url'] + this.props.info.url}
                   onError={(e) => {
-                    if (e.target.src === IMAGE_BASE + this.props.info.url) {
-                      e.target.src = IMAGE_BAK_BASE + this.props.info.url;
+                    if (e.target.src === localStorage['img_base_url'] + this.props.info.url) {
+                      e.target.src = localStorage['img_base_url_bak'] + this.props.info.url;
                     }
                   }}
-                  alt={IMAGE_BASE + this.props.info.url}
+                  alt={localStorage['img_base_url'] + this.props.info.url}
                 />
               )}
             </p>
@@ -295,28 +297,28 @@ class FlowItem extends PureComponent {
                 {props.img_clickable ? (
                   <a
                     className="no-underline"
-                    href={IMAGE_BASE + props.info.url}
+                    href={localStorage['img_base_url'] + props.info.url}
                     target="_blank"
                   >
                     <img
-                      src={IMAGE_BASE + props.info.url}
+                      src={localStorage['img_base_url'] + props.info.url}
                       onError={(e) => {
-                        if (e.target.src === IMAGE_BASE + props.info.url) {
-                          e.target.src = IMAGE_BAK_BASE + props.info.url;
+                        if (e.target.src === localStorage['img_base_url'] + props.info.url) {
+                          e.target.src = localStorage['img_base_url_bak'] + props.info.url;
                         }
                       }}
-                      alt={IMAGE_BASE + props.info.url}
+                      alt={localStorage['img_base_url'] + props.info.url}
                     />
                   </a>
                 ) : (
                   <img
-                    src={IMAGE_BASE + props.info.url}
+                    src={localStorage['img_base_url'] + props.info.url}
                     onError={(e) => {
-                      if (e.target.src === IMAGE_BASE + props.info.url) {
-                        e.target.src = IMAGE_BAK_BASE + props.info.url;
+                      if (e.target.src === localStorage['img_base_url'] + props.info.url) {
+                        e.target.src = localStorage['img_base_url_bak'] + props.info.url;
                       }
                     }}
-                    alt={IMAGE_BASE + props.info.url}
+                    alt={localStorage['img_base_url'] + props.info.url}
                   />
                 )}
               </p>
@@ -683,7 +685,7 @@ class FlowItemRow extends PureComponent {
   constructor(props) {
     super(props);
     this.needFold =
-      FOLD_TAGS.indexOf(props.info.tag) > -1 &&
+      fold_tags.indexOf(props.info.tag) > -1 &&
       (props.search_param === '热榜' || !props.search_param) &&
       window.config.fold &&
       props.mode !== 'attention' && props.mode !== 'attention_finished';
@@ -1080,6 +1082,7 @@ export class Flow extends PureComponent {
         title: '',
         data: [],
       },
+      announcement: '',
       loading_status: 'done',
       error_msg: null,
     };
@@ -1103,6 +1106,7 @@ export class Flow extends PureComponent {
       if (this.state.mode === 'list') {
         API.get_list(page, this.props.token)
           .then((json) => {
+            let announcement = this.state.announcement;
             if (page === 1 && json.data.length) {
               // update latest_post_id
               let max_id = -1;
@@ -1110,6 +1114,26 @@ export class Flow extends PureComponent {
                 if (parseInt(x.pid, 10) > max_id) max_id = parseInt(x.pid, 10);
               });
               localStorage['_LATEST_POST_ID'] = '' + max_id;
+              if (json.config) {
+                localStorage['img_base_url'] = json.config.img_base_url;
+                localStorage['img_base_url_bak'] = json.config.img_base_url_bak;
+                fold_tags = JSON.stringify(json.config.fold_tags);
+                if (json.config.announcement) {
+                  announcement = json.config.announcement;
+                }
+                let versions_remote = json.config.web_frontend_version.substring(1).split('.');
+                console.log('remote version:', versions_remote);
+                if (process.env.REACT_APP_BUILD_INFO) {
+                  let versions_local = process.env.REACT_APP_BUILD_INFO.substring(1).split('.');
+                  if (
+                    versions_remote[0] - versions_local[0] > 0 ||
+                    versions_remote[1] - versions_local[1] > 0 ||
+                    versions_remote[2] - versions_local[2] > 0
+                  ) {
+                    DoUpdate();
+                  }
+                }
+              }
             }
             this.setState((prev, props) => ({
               chunks: {
@@ -1124,6 +1148,7 @@ export class Flow extends PureComponent {
                   ),
                 ),
               },
+              announcement: announcement,
               loading_status: 'done',
             }));
           })
@@ -1237,8 +1262,18 @@ export class Flow extends PureComponent {
 
   render() {
     const should_deletion_detect = localStorage['DELETION_DETECT'] === 'on';
+    let show_pid = load_single_meta(this.props.show_sidebar, this.props.token);
     return (
       <div className="flow-container">
+        {this.state.announcement && (
+          <div className="box flow-item box-warning">
+            <HighlightedMarkdown
+              text={this.state.announcement}
+              color_picker={this.color_picker}
+              show_pid={show_pid}
+            />
+          </div>
+        )}
         <FlowChunk
           title={this.state.chunks.title}
           list={this.state.chunks.data}

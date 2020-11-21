@@ -35,6 +35,17 @@
     color: var(--foreground-dark);
 }
 
+.box-warning {
+    background-color: #db8e14;
+    color: white;
+    text-shadow: 0 0 1px black;
+}
+
+.root-dark-mode .box-warning {
+    background-color: #b47209;
+    text-shadow: 0 0 1px black;
+}
+
 .left-container .flow-item {
     display: inline-block;
     width: 600px;

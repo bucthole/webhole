@@ -205,6 +205,22 @@ export const TokenCtx = React.createContext({
 //         )
 //     }
 // }
+export function DoUpdate() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => {
+      for (let registration of registrations) {
+        console.log('unregister', registration);
+        registration.unregister();
+      }
+    });
+  }
+  cache().clear();
+  setTimeout(() => {
+    window.location.reload(true);
+  }, 200);
+}
 
 export function InfoSidebar(props) {
   return (
@@ -236,26 +252,7 @@ export function InfoSidebar(props) {
       </div>
       <div className="box help-desc-box">
         <p>
-          <a
-            onClick={() => {
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker
-                  .getRegistrations()
-                  .then((registrations) => {
-                    for (let registration of registrations) {
-                      console.log('unregister', registration);
-                      registration.unregister();
-                    }
-                  });
-              }
-              cache().clear();
-              setTimeout(() => {
-                window.location.reload(true);
-              }, 200);
-            }}
-          >
-            强制检查更新
-          </a>
+          <a onClick={DoUpdate}>强制检查更新</a>
           （当前版本：【{process.env.REACT_APP_BUILD_INFO || '---'}{' '}
           {process.env.NODE_ENV}】 会自动在后台检查更新并在下次访问时更新）
         </p>
