@@ -207,9 +207,7 @@ export const TokenCtx = React.createContext({
 // }
 export function DoUpdate() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
       for (let registration of registrations) {
         console.log('unregister', registration);
         registration.unregister();
@@ -929,7 +927,11 @@ export class PostForm extends Component {
           </p>
         )}
         {this.state.preview ? (
-          <div className={this.props.action === 'dopost' ? "post-preview" : "reply-preview"}>
+          <div
+            className={
+              this.props.action === 'dopost' ? 'post-preview' : 'reply-preview'
+            }
+          >
             <HighlightedMarkdown
               text={this.state.text}
               color_picker={this.color_picker}

@@ -65,12 +65,13 @@ class Cache {
     pid = parseInt(pid);
     return new Promise((resolve, reject) => {
       if (!this.db) return resolve(null);
-      let get_req,store;
+      let get_req, store;
       try {
-        const tx=this.db.transaction(['comment'],'readwrite');
-        store=tx.objectStore('comment');
-        get_req=store.get(pid);
-      } catch(e) { // ios sometimes fail at here, just ignore it
+        const tx = this.db.transaction(['comment'], 'readwrite');
+        store = tx.objectStore('comment');
+        get_req = store.get(pid);
+      } catch (e) {
+        // ios sometimes fail at here, just ignore it
         console.exception(e);
         resolve(null);
       }
@@ -113,17 +114,17 @@ class Cache {
     return new Promise((resolve, reject) => {
       if (!this.db) return resolve();
       try {
-        const tx=this.db.transaction(['comment'],'readwrite');
-        const store=tx.objectStore('comment');
+        const tx = this.db.transaction(['comment'], 'readwrite');
+        const store = tx.objectStore('comment');
         store.put({
-            pid: pid,
-            version: target_version,
-            data_str: this.encrypt(pid,data),
-            last_access: +new Date(),
+          pid: pid,
+          version: target_version,
+          data_str: this.encrypt(pid, data),
+          last_access: +new Date(),
         });
-        if(++this.added_items_since_maintenance===MAINTENANCE_STEP)
-            setTimeout(this.maintenance.bind(this),1);
-      } catch(e) {
+        if (++this.added_items_since_maintenance === MAINTENANCE_STEP)
+          setTimeout(this.maintenance.bind(this), 1);
+      } catch (e) {
         console.exception(e);
         return resolve();
       }
@@ -136,10 +137,10 @@ class Cache {
       if (!this.db) return resolve();
       let req;
       try {
-        const tx=this.db.transaction(['comment'],'readwrite');
-        const store=tx.objectStore('comment');
-        req=store.delete(pid);
-      } catch(e) {
+        const tx = this.db.transaction(['comment'], 'readwrite');
+        const store = tx.objectStore('comment');
+        req = store.delete(pid);
+      } catch (e) {
         console.exception(e);
         return resolve();
       }
@@ -182,7 +183,7 @@ class Cache {
     try {
       indexedDB.deleteDatabase(HOLE_CACHE_DB_NAME);
       console.log('delete comment cache db');
-    } catch(e) {
+    } catch (e) {
       console.exception(e);
     }
   }

@@ -21,10 +21,10 @@ import {
 import './Flows.css';
 import LazyLoad, { forceCheck } from './react-lazyload/src';
 // import { AudioWidget } from './AudioWidget';
-import {TokenCtx, ReplyForm, PostForm, DoUpdate} from './UserAction';
+import { TokenCtx, ReplyForm, PostForm, DoUpdate } from './UserAction';
 
 import { API } from './flows_api';
-import {cache} from "./cache";
+import { cache } from './cache';
 
 // const localStorage['img_base_url'] = 'https://thimg.yecdn.com/';
 // const localStorage['img_base_url_bak'] = 'https://img2.thuhole.com/';
@@ -165,8 +165,13 @@ class Reply extends PureComponent {
                   <img
                     src={localStorage['img_base_url'] + this.props.info.url}
                     onError={(e) => {
-                      if (e.target.src === localStorage['img_base_url'] + this.props.info.url) {
-                        e.target.src = localStorage['img_base_url_bak'] + this.props.info.url;
+                      if (
+                        e.target.src ===
+                        localStorage['img_base_url'] + this.props.info.url
+                      ) {
+                        e.target.src =
+                          localStorage['img_base_url_bak'] +
+                          this.props.info.url;
                       }
                     }}
                     alt={localStorage['img_base_url'] + this.props.info.url}
@@ -176,8 +181,12 @@ class Reply extends PureComponent {
                 <img
                   src={localStorage['img_base_url'] + this.props.info.url}
                   onError={(e) => {
-                    if (e.target.src === localStorage['img_base_url'] + this.props.info.url) {
-                      e.target.src = localStorage['img_base_url_bak'] + this.props.info.url;
+                    if (
+                      e.target.src ===
+                      localStorage['img_base_url'] + this.props.info.url
+                    ) {
+                      e.target.src =
+                        localStorage['img_base_url_bak'] + this.props.info.url;
                     }
                   }}
                   alt={localStorage['img_base_url'] + this.props.info.url}
@@ -303,8 +312,12 @@ class FlowItem extends PureComponent {
                     <img
                       src={localStorage['img_base_url'] + props.info.url}
                       onError={(e) => {
-                        if (e.target.src === localStorage['img_base_url'] + props.info.url) {
-                          e.target.src = localStorage['img_base_url_bak'] + props.info.url;
+                        if (
+                          e.target.src ===
+                          localStorage['img_base_url'] + props.info.url
+                        ) {
+                          e.target.src =
+                            localStorage['img_base_url_bak'] + props.info.url;
                         }
                       }}
                       alt={localStorage['img_base_url'] + props.info.url}
@@ -314,8 +327,12 @@ class FlowItem extends PureComponent {
                   <img
                     src={localStorage['img_base_url'] + props.info.url}
                     onError={(e) => {
-                      if (e.target.src === localStorage['img_base_url'] + props.info.url) {
-                        e.target.src = localStorage['img_base_url_bak'] + props.info.url;
+                      if (
+                        e.target.src ===
+                        localStorage['img_base_url'] + props.info.url
+                      ) {
+                        e.target.src =
+                          localStorage['img_base_url_bak'] + props.info.url;
                       }
                     }}
                     alt={localStorage['img_base_url'] + props.info.url}
@@ -688,15 +705,17 @@ class FlowItemRow extends PureComponent {
       fold_tags.indexOf(props.info.tag) > -1 &&
       (props.search_param === '热榜' || !props.search_param) &&
       window.config.fold &&
-      props.mode !== 'attention' && props.mode !== 'attention_finished';
+      props.mode !== 'attention' &&
+      props.mode !== 'attention_finished';
     this.state = {
       replies: [],
       reply_status: 'done',
       reply_error: null,
       info: Object.assign({}, props.info, { variant: {} }),
-      hidden: window.config.block_words.some((word) =>
-        props.info.text.includes(word),
-      ) || this.needFold,
+      hidden:
+        window.config.block_words.some((word) =>
+          props.info.text.includes(word),
+        ) || this.needFold,
       attention:
         props.attention_override === null ? false : props.attention_override,
       cached: true, // default no display anything
@@ -1121,10 +1140,14 @@ export class Flow extends PureComponent {
                 if (json.config.announcement) {
                   announcement = json.config.announcement;
                 }
-                let versions_remote = json.config.web_frontend_version.substring(1).split('.');
+                let versions_remote = json.config.web_frontend_version
+                  .substring(1)
+                  .split('.');
                 console.log('remote version:', versions_remote);
                 if (process.env.REACT_APP_BUILD_INFO) {
-                  let versions_local = process.env.REACT_APP_BUILD_INFO.substring(1).split('.');
+                  let versions_local = process.env.REACT_APP_BUILD_INFO.substring(
+                    1,
+                  ).split('.');
                   if (
                     versions_remote[0] - versions_local[0] > 0 ||
                     versions_remote[1] - versions_local[1] > 0 ||
