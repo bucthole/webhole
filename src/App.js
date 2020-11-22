@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import { Flow } from './Flows';
 import { Title } from './Title';
 import { Sidebar } from './Sidebar';
+import { SwitchTransition, CSSTransition } from 'react-transition-group';
 import { PressureHelper } from './PressureHelper';
 import { TokenCtx } from './UserAction';
 import { load_config, bgimg_style } from './Config';
 import { listen_darkmode } from './infrastructure/functions';
 import { LoginPopup, TitleLine } from './infrastructure/widgets';
 import { cache } from './cache';
+import './App.css';
 
 const MAX_SIDEBAR_STACK_SIZE = 10;
 
@@ -50,9 +52,9 @@ class App extends Component {
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
   }
-    componentDidMount() {
-        cache(); // init indexeddb
-    }
+  componentDidMount() {
+    cache(); // init indexeddb
+  }
 
   on_pressure() {
     if (this.state.sidebar_stack.length > 1)
@@ -147,13 +149,21 @@ class App extends Component {
                 </div>
               )}
               {this.inthu_flag || token.value ? (
-                <Flow
-                  key={this.state.flow_render_key}
-                  show_sidebar={this.show_sidebar_bound}
-                  mode={this.state.mode}
-                  search_text={this.state.search_text}
-                  token={token.value}
-                />
+                <SwitchTransition mode="out-in">
+                  <CSSTransition
+                    key={this.state.flow_render_key}
+                    timeout={100}
+                    classNames="flows-anim"
+                  >
+                    <Flow
+                      key={this.state.flow_render_key}
+                      show_sidebar={this.show_sidebar_bound}
+                      mode={this.state.mode}
+                      search_text={this.state.search_text}
+                      token={token.value}
+                    />
+                  </CSSTransition>
+                </SwitchTransition>
               ) : (
                 <TitleLine text="请登录后查看内容" />
               )}
