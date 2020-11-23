@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 
 import './Config.css';
+import { HighlightedMarkdown } from './Common';
 
 const BUILTIN_IMGS = {
   'https://cdn.jsdelivr.net/gh/thuhole/webhole@gh-pages/static/bg/gbp.jpg':
@@ -427,6 +428,25 @@ export class ConfigUI extends PureComponent {
             name="折叠树洞"
             description="在时间线中折叠可能引起不适的树洞"
           />
+          <hr />
+          <p>已隐藏的公告</p>
+          {localStorage['hide_announcement'] && (
+            <div className="box flow-item box-warning">
+              <HighlightedMarkdown
+                text={localStorage['hide_announcement']}
+                color_picker={this.color_picker}
+                show_pid={() => {}}
+              />
+              <a
+                onClick={() => {
+                  delete localStorage['hide_announcement'];
+                  alert('已取消隐藏公告');
+                }}
+              >
+                [取消隐藏]
+              </a>
+            </div>
+          )}
           <hr />
           <p>
             新功能建议或问题反馈请在&nbsp;
