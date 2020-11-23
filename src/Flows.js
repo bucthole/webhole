@@ -1290,7 +1290,7 @@ export class Flow extends PureComponent {
       <div className="flow-container">
         {this.state.announcement &&
           this.state.announcement !== localStorage['hide_announcement'] && (
-            <div className="box flow-item box-warning">
+            <div className="box flow-item">
               <HighlightedMarkdown
                 text={this.state.announcement}
                 color_picker={this.color_picker}
