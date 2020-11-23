@@ -1288,15 +1288,24 @@ export class Flow extends PureComponent {
     let show_pid = load_single_meta(this.props.show_sidebar, this.props.token);
     return (
       <div className="flow-container">
-        {this.state.announcement && (
-          <div className="box flow-item box-warning">
-            <HighlightedMarkdown
-              text={this.state.announcement}
-              color_picker={this.color_picker}
-              show_pid={show_pid}
-            />
-          </div>
-        )}
+        {this.state.announcement &&
+          this.state.announcement !== localStorage['hide_announcement'] && (
+            <div className="box flow-item box-warning">
+              <HighlightedMarkdown
+                text={this.state.announcement}
+                color_picker={this.color_picker}
+                show_pid={show_pid}
+              />
+              <a
+                onClick={() => {
+                  localStorage['hide_announcement'] = this.state.announcement;
+                  this.setState({ announcement: '' });
+                }}
+              >
+                [隐藏此公告]
+              </a>
+            </div>
+          )}
         <FlowChunk
           title={this.state.chunks.title}
           list={this.state.chunks.data}
