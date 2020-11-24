@@ -432,7 +432,7 @@ export class ConfigUI extends PureComponent {
             <div>
               <hr />
               <p>已隐藏的公告</p>
-              <div className="box flow-item box-warning">
+              <div className="box flow-item box-announcement">
                 <HighlightedMarkdown
                   text={localStorage['hide_announcement']}
                   color_picker={this.color_picker}

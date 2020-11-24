@@ -35,15 +35,21 @@
     color: var(--foreground-dark);
 }
 
-.box-warning {
-    background-color: #db8e14;
-    color: white;
-    text-shadow: 0 0 1px black;
+.box-announcement {
+    /*background-color: #db8e14;*/
+    background-color: rgb(164, 185, 217);
+    /*color: white;*/
+    /*text-shadow: 0 0 1px black;*/
+    /*--var-link-color: rgb(164, 185, 217);*/
 }
 
-.root-dark-mode .box-warning {
-    background-color: #b47209;
-    text-shadow: 0 0 1px black;
+.root-dark-mode .box-announcement {
+    /*background-color: #b47209;*/
+    background-color: rgb(164, 185, 217);
+    /*background-color: rgb(35, 67, 161);*/
+    color: black;
+    --var-link-color: #00c;
+        /*text-shadow: 0 0 1px black;*/
 }
 
 .left-container .flow-item {
