@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 import copy from 'copy-to-clipboard';
 import ReactDOM from 'react-dom';
 import ImageSlides from 'react-imageslides';
-import 'react-awesome-lightbox/build/style.css';
 import { ColorPicker } from './color_picker';
 import {
   split_text,
