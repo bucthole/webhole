@@ -379,6 +379,7 @@ export class ClickHandler extends PureComponent {
 
     this.MOVE_THRESHOLD = 3;
     this.last_fire = 0;
+    this.popup_anchor = document.getElementById('img_viewer');
   }
 
   on_begin(e) {
@@ -411,6 +412,7 @@ export class ClickHandler extends PureComponent {
 
   do_callback(event) {
     if (this.last_fire + 100 > +new Date()) return;
+    if (this.popup_anchor && this.popup_anchor.children.length !== 0) return;
     this.last_fire = +new Date();
     this.props.callback(event);
   }

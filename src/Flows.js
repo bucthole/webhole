@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
 import copy from 'copy-to-clipboard';
-import Viewer from 'react-viewer';
+import ReactDOM from 'react-dom';
+import Lightbox from 'react-awesome-lightbox';
+import 'react-awesome-lightbox/build/style.css';
 import { ColorPicker } from './color_picker';
 import {
   split_text,
@@ -58,15 +60,17 @@ window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
 const DZ_NAME = '洞主';
 
 const ImageComponent = (props) => (
-  <img
-    src={localStorage['img_base_url'] + props.path}
-    onError={(e) => {
-      if (e.target.src === localStorage['img_base_url'] + props.path) {
-        e.target.src = localStorage['img_base_url_bak'] + props.path;
-      }
-    }}
-    alt={localStorage['img_base_url'] + props.path}
-  />
+  <p className="img">
+    <img
+      src={localStorage['img_base_url'] + props.path}
+      onError={(e) => {
+        if (e.target.src === localStorage['img_base_url'] + props.path) {
+          e.target.src = localStorage['img_base_url_bak'] + props.path;
+        }
+      }}
+      alt={localStorage['img_base_url'] + props.path}
+    />
+  </p>
 );
 
 class ImageViewer extends PureComponent {
@@ -75,6 +79,13 @@ class ImageViewer extends PureComponent {
     this.state = {
       visible: false,
     };
+
+    this.popup_anchor = document.getElementById('img_viewer');
+    if (!this.popup_anchor) {
+      this.popup_anchor = document.createElement('div');
+      this.popup_anchor.id = 'img_viewer';
+      document.body.appendChild(this.popup_anchor);
+    }
   }
 
   render() {
@@ -92,15 +103,19 @@ class ImageViewer extends PureComponent {
         >
           <ImageComponent path={this.props.url} />
         </a>
-        <Viewer
-          visible={this.state.visible}
-          onClose={() => {
-            this.setState({ visible: false });
-          }}
-          images={[
-            { src: localStorage['img_base_url'] + this.props.url, alt: '' },
-          ]}
-        />
+        {this.state.visible &&
+          ReactDOM.createPortal(
+            <div>
+              <Lightbox
+                image={localStorage['img_base_url_bak'] + this.props.url}
+                onClose={() => {
+                  this.setState({ visible: false });
+                }}
+                // title="Image Title"
+              />
+            </div>,
+            this.popup_anchor,
+          )}
       </div>
     );
   }
@@ -205,12 +220,10 @@ class Reply extends PureComponent {
             show_pid={this.props.show_pid}
           />
           {this.props.info.type === 'image' && (
-            <p className="img">
-              <ImageViewer
-                img_clickable={this.props.img_clickable}
-                url={this.props.info.url}
-              />
-            </p>
+            <ImageViewer
+              img_clickable={this.props.img_clickable}
+              url={this.props.info.url}
+            />
           )}
         </div>
       </div>
@@ -320,12 +333,10 @@ class FlowItem extends PureComponent {
               show_pid={props.show_pid}
             />
             {props.info.type === 'image' && (
-              <p className="img">
-                <ImageViewer
-                  img_clickable={props.img_clickable}
-                  url={props.info.url}
-                />
-              </p>
+              <ImageViewer
+                img_clickable={props.img_clickable}
+                url={props.info.url}
+              />
             )}
             {/*{props.info.type==='audio' && <AudioWidget src={AUDIO_BASE+props.info.url} />}*/}
           </div>
