@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import copy from 'copy-to-clipboard';
 import ReactDOM from 'react-dom';
+import { isMobile } from 'react-device-detect';
 import ImageSlides from 'react-imageslides';
 import { ColorPicker } from './color_picker';
 import {
@@ -91,8 +92,7 @@ class ImageViewer extends PureComponent {
     if (!this.props.img_clickable) {
       return <ImageComponent path={this.props.url} />;
     }
-    const touch = matchMedia('(hover: none)').matches;
-    if (!touch) {
+    if (!isMobile) {
       return (
         <a
           className="no-underline"
