@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import copy from 'copy-to-clipboard';
 import ReactDOM from 'react-dom';
-import Lightbox from 'react-awesome-lightbox';
+import ImageSlides from 'react-imageslides';
 import 'react-awesome-lightbox/build/style.css';
 import { ColorPicker } from './color_picker';
 import {
@@ -92,6 +92,18 @@ class ImageViewer extends PureComponent {
     if (!this.props.img_clickable) {
       return <ImageComponent path={this.props.url} />;
     }
+    const touch = matchMedia('(hover: none)').matches;
+    if (!touch) {
+      return (
+        <a
+          className="no-underline"
+          href={localStorage['img_base_url'] + this.props.url}
+          target="_blank"
+        >
+          <ImageComponent path={this.props.url} />
+        </a>
+      );
+    }
     return (
       <div>
         <a
@@ -106,12 +118,12 @@ class ImageViewer extends PureComponent {
         {this.state.visible &&
           ReactDOM.createPortal(
             <div>
-              <Lightbox
-                image={localStorage['img_base_url_bak'] + this.props.url}
+              <ImageSlides
+                images={[localStorage['img_base_url'] + this.props.url]}
+                isOpen
                 onClose={() => {
                   this.setState({ visible: false });
                 }}
-                // title="Image Title"
               />
             </div>,
             this.popup_anchor,
