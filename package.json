@@ -18,7 +18,8 @@
     "react-google-recaptcha-v3": "^1.7.0",
     "react-scripts": "^3.4.4",
     "react-timeago": "^4.4.0",
-    "react-transition-group": "^4.4.1"
+    "react-transition-group": "^4.4.1",
+    "react-viewer": "^3.2.2"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import copy from 'copy-to-clipboard';
+import Viewer from 'react-viewer';
 import { ColorPicker } from './color_picker';
 import {
   split_text,
@@ -55,6 +56,55 @@ let fold_tags = [];
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
 
 const DZ_NAME = '洞主';
+
+const ImageComponent = (props) => (
+  <img
+    src={localStorage['img_base_url'] + props.path}
+    onError={(e) => {
+      if (e.target.src === localStorage['img_base_url'] + props.path) {
+        e.target.src = localStorage['img_base_url_bak'] + props.path;
+      }
+    }}
+    alt={localStorage['img_base_url'] + props.path}
+  />
+);
+
+class ImageViewer extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      visible: false,
+    };
+  }
+
+  render() {
+    if (!this.props.img_clickable) {
+      return <ImageComponent path={this.props.url} />;
+    }
+    return (
+      <div>
+        <a
+          className="no-underline"
+          onClick={() => {
+            this.setState({ visible: true });
+          }}
+          target="_blank"
+        >
+          <ImageComponent path={this.props.url} />
+        </a>
+        <Viewer
+          visible={this.state.visible}
+          onClose={() => {
+            this.setState({ visible: false });
+          }}
+          images={[
+            { src: localStorage['img_base_url'] + this.props.url, alt: '' },
+          ]}
+        />
+      </div>
+    );
+  }
+}
 
 function load_single_meta(show_sidebar, token) {
   return async (pid, replace = false) => {
@@ -156,42 +206,10 @@ class Reply extends PureComponent {
           />
           {this.props.info.type === 'image' && (
             <p className="img">
-              {this.props.img_clickable ? (
-                <a
-                  className="no-underline"
-                  href={localStorage['img_base_url'] + this.props.info.url}
-                  target="_blank"
-                >
-                  <img
-                    src={localStorage['img_base_url'] + this.props.info.url}
-                    onError={(e) => {
-                      if (
-                        e.target.src ===
-                        localStorage['img_base_url'] + this.props.info.url
-                      ) {
-                        e.target.src =
-                          localStorage['img_base_url_bak'] +
-                          this.props.info.url;
-                      }
-                    }}
-                    alt={localStorage['img_base_url'] + this.props.info.url}
-                  />
-                </a>
-              ) : (
-                <img
-                  src={localStorage['img_base_url'] + this.props.info.url}
-                  onError={(e) => {
-                    if (
-                      e.target.src ===
-                      localStorage['img_base_url'] + this.props.info.url
-                    ) {
-                      e.target.src =
-                        localStorage['img_base_url_bak'] + this.props.info.url;
-                    }
-                  }}
-                  alt={localStorage['img_base_url'] + this.props.info.url}
-                />
-              )}
+              <ImageViewer
+                img_clickable={this.props.img_clickable}
+                url={this.props.info.url}
+              />
             </p>
           )}
         </div>
@@ -303,41 +321,10 @@ class FlowItem extends PureComponent {
             />
             {props.info.type === 'image' && (
               <p className="img">
-                {props.img_clickable ? (
-                  <a
-                    className="no-underline"
-                    href={localStorage['img_base_url'] + props.info.url}
-                    target="_blank"
-                  >
-                    <img
-                      src={localStorage['img_base_url'] + props.info.url}
-                      onError={(e) => {
-                        if (
-                          e.target.src ===
-                          localStorage['img_base_url'] + props.info.url
-                        ) {
-                          e.target.src =
-                            localStorage['img_base_url_bak'] + props.info.url;
-                        }
-                      }}
-                      alt={localStorage['img_base_url'] + props.info.url}
-                    />
-                  </a>
-                ) : (
-                  <img
-                    src={localStorage['img_base_url'] + props.info.url}
-                    onError={(e) => {
-                      if (
-                        e.target.src ===
-                        localStorage['img_base_url'] + props.info.url
-                      ) {
-                        e.target.src =
-                          localStorage['img_base_url_bak'] + props.info.url;
-                      }
-                    }}
-                    alt={localStorage['img_base_url'] + props.info.url}
-                  />
-                )}
+                <ImageViewer
+                  img_clickable={props.img_clickable}
+                  url={props.info.url}
+                />
               </p>
             )}
             {/*{props.info.type==='audio' && <AudioWidget src={AUDIO_BASE+props.info.url} />}*/}
