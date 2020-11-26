@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "copy-to-clipboard": "^3.3.1",
+    "detect-browser": "^5.2.0",
     "fix-orientation": "^1.1.0",
     "gh-pages": "^3.1.0",
     "highlight.js": "^10.4.0",
@@ -13,7 +14,6 @@
     "markdown-it-katex": "^2.0.3",
     "pressure": "^2.2.0",
     "react": "^16.14.0",
-    "react-device-detect": "^1.14.0",
     "react-dom": "^16.14.0",
     "react-google-recaptcha": "^2.1.0",
     "react-google-recaptcha-v3": "^1.7.0",

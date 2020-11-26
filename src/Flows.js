@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import copy from 'copy-to-clipboard';
 import ReactDOM from 'react-dom';
-import { isMobile } from 'react-device-detect';
+const { detect } = require('detect-browser');
+const browser = detect();
 import ImageSlides from 'react-imageslides';
 import { ColorPicker } from './color_picker';
 import {
@@ -92,42 +93,45 @@ class ImageViewer extends PureComponent {
     if (!this.props.img_clickable) {
       return <ImageComponent path={this.props.url} />;
     }
-    if (!isMobile) {
+    if (
+      browser &&
+      (browser.name === 'ios-webview' || browser.name === 'chromium-webview')
+    ) {
       return (
-        <a
-          className="no-underline"
-          href={localStorage['img_base_url'] + this.props.url}
-          target="_blank"
-        >
-          <ImageComponent path={this.props.url} />
-        </a>
+        <div>
+          <a
+            className="no-underline"
+            onClick={() => {
+              this.setState({ visible: true });
+            }}
+            target="_blank"
+          >
+            <ImageComponent path={this.props.url} />
+          </a>
+          {this.state.visible &&
+            ReactDOM.createPortal(
+              <div>
+                <ImageSlides
+                  images={[localStorage['img_base_url'] + this.props.url]}
+                  isOpen
+                  onClose={() => {
+                    this.setState({ visible: false });
+                  }}
+                />
+              </div>,
+              this.popup_anchor,
+            )}
+        </div>
       );
     }
     return (
-      <div>
-        <a
-          className="no-underline"
-          onClick={() => {
-            this.setState({ visible: true });
-          }}
-          target="_blank"
-        >
-          <ImageComponent path={this.props.url} />
-        </a>
-        {this.state.visible &&
-          ReactDOM.createPortal(
-            <div>
-              <ImageSlides
-                images={[localStorage['img_base_url'] + this.props.url]}
-                isOpen
-                onClose={() => {
-                  this.setState({ visible: false });
-                }}
-              />
-            </div>,
-            this.popup_anchor,
-          )}
-      </div>
+      <a
+        className="no-underline"
+        href={localStorage['img_base_url'] + this.props.url}
+        target="_blank"
+      >
+        <ImageComponent path={this.props.url} />
+      </a>
     );
   }
 }
