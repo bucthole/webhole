@@ -1,6 +1,14 @@
-import React, { PureComponent } from 'react';
+import React, {
+  Component,
+  PureComponent,
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+} from 'react';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import copy from 'copy-to-clipboard';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
 const { detect } = require('detect-browser');
 const browser = detect();
 import ImageSlides from 'react-imageslides';
@@ -28,6 +36,7 @@ import LazyLoad, { forceCheck } from './react-lazyload/src';
 import { TokenCtx, ReplyForm, PostForm, DoUpdate } from './UserAction';
 
 import { API } from './flows_api';
+const ADMIN_COMMANDS = ['reports', 'messages'];
 import { cache } from './cache';
 
 // const localStorage['img_base_url'] = 'https://thimg.yecdn.com/';
@@ -39,22 +48,6 @@ const PREVIEW_REPLY_COUNT = 10;
 // const QUOTE_BLACKLIST=['23333','233333','66666','666666','10086','10000','100000','99999','999999','55555','555555'];
 const QUOTE_BLACKLIST = [];
 let fold_tags = [];
-// const FOLD_TAGS = [
-//   '性相关',
-//   '政治相关',
-//   // '性话题',
-//   // '政治话题',
-//   '折叠',
-//   'NSFW',
-//   '刷屏',
-//   '真实性可疑',
-//   // '用户举报较多',
-//   '举报较多',
-//   '重复内容',
-//   '引战',
-//   '未经证实的传闻',
-//   '令人不适',
-// ];
 
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
 
@@ -90,7 +83,7 @@ class ImageViewer extends PureComponent {
   }
 
   render() {
-    if (!this.props.img_clickable) {
+    if (!this.props.in_sidebar) {
       return <ImageComponent path={this.props.url} />;
     }
     if (
@@ -136,54 +129,53 @@ class ImageViewer extends PureComponent {
   }
 }
 
-function load_single_meta(show_sidebar, token) {
-  return async (pid, replace = false) => {
+export function load_single_meta(show_sidebar, token) {
+  return (pid, replace = false) => {
+    pid = parseInt(pid);
     let color_picker = new ColorPicker();
-    let title_elem = '树洞 #' + pid;
+    let title_elem = '树洞 ' + pid;
     show_sidebar(
       title_elem,
       <div className="box box-tip">正在加载 #{pid}</div>,
       replace ? 'replace' : 'push',
     );
-    try {
-      let single = await API.get_single(pid, token);
-      single.data.variant = {};
-      let { data: replies } = await API.load_replies_with_cache(
-        pid,
-        token,
-        color_picker,
-        parseInt(single.data.reply),
-      );
-      show_sidebar(
-        title_elem,
-        <FlowSidebar
-          key={+new Date()}
-          info={single.data}
-          replies={replies.data}
-          attention={replies.attention}
-          token={token}
-          show_sidebar={show_sidebar}
-          color_picker={color_picker}
-          deletion_detect={localStorage['DELETION_DETECT'] === 'on'}
-        />,
-        'replace',
-      );
-    } catch (e) {
-      console.error(e);
-      show_sidebar(
-        title_elem,
-        <div className="box box-tip">
-          <p>
-            <a onClick={() => load_single_meta(show_sidebar, token)(pid, true)}>
-              重新加载
-            </a>
-          </p>
-          <p>{'' + e}</p>
-        </div>,
-        'replace',
-      );
-    }
+    API.load_replies(pid, token, color_picker)
+      .then((json) => {
+        show_sidebar(
+          title_elem,
+          <FlowSidebar
+            key={+new Date()}
+            info={json.post}
+            replies={json.data}
+            token={token}
+            show_sidebar={show_sidebar}
+            color_picker={color_picker}
+          />,
+          'replace',
+        );
+      })
+      .catch((e) => {
+        console.error(e);
+        show_sidebar(
+          title_elem,
+          <div className="box box-tip">
+            <p>
+              <a
+                onClick={() => load_single_meta(show_sidebar, token)(pid, true)}
+              >
+                重新加载
+              </a>
+            </p>
+            <p>{'' + e}</p>
+          </div>,
+          'replace',
+        );
+      });
   };
+}
+
+function search_hit(txt, terms) {
+  return terms.filter((t) => t).some((term) => txt.indexOf(term) !== -1);
 }
 
 class Reply extends PureComponent {
@@ -194,6 +186,7 @@ class Reply extends PureComponent {
   render() {
     const replyContent = this.props.info.text;
     const splitIdx = replyContent.indexOf(']');
+    let props = this.props;
 
     const author = replyContent.substr(0, splitIdx + 1),
       replyText = replyContent.substr(splitIdx + 2);
@@ -210,33 +203,38 @@ class Reply extends PureComponent {
         }
       >
         <div className="box-header">
+          {props.header_badges}
           <code className="box-id">#{this.props.info.cid}</code>
-          {!!this.props.do_filter_name && (
-            <span
-              className="reply-header-badge clickable"
-              onClick={() => {
-                this.props.do_filter_name(this.props.info.name);
-              }}
-            >
-              <span className="icon icon-locate" />
-            </span>
-          )}
           &nbsp;
           {this.props.info.tag !== null && (
             <span className="box-header-tag">{this.props.info.tag}</span>
           )}
           <Time stamp={this.props.info.timestamp} short={false} />
         </div>
+        {this.props.info.deleted && (
+          <p key="deleted-hint" className="flow-variant-warning">
+            （已删除）
+          </p>
+        )}
+        {this.props.info.variant.report_widget && this.props.in_sidebar && (
+          <ReportWidget
+            key="report"
+            info={props.info}
+            is_reply={true}
+            set_variant={props.set_variant}
+          />
+        )}
         <div className="box-content">
           <HighlightedMarkdown
             author={author}
             text={replyText}
+            search_param={this.props.search_param}
             color_picker={this.props.color_picker}
             show_pid={this.props.show_pid}
           />
           {this.props.info.type === 'image' && (
             <ImageViewer
-              img_clickable={this.props.img_clickable}
+              in_sidebar={this.props.in_sidebar}
               url={this.props.info.url}
             />
           )}
@@ -244,6 +242,163 @@ class Reply extends PureComponent {
       </div>
     );
   }
+}
+
+function ReportWidget(props) {
+  let [fold_reason, set_fold_reason] = useState('');
+
+  function report(report_type) {
+    const item_type = props.is_reply ? 'comment' : 'post';
+    let id = props.is_reply ? props.info.cid : props.info.pid;
+
+    let report_type_str = {
+      fold: '举报折叠',
+      delete: '删除',
+      undelete_unban: '撤销删除',
+      delete_ban: '删帖禁言',
+      unban: '解封',
+      set_tag: '打tag',
+      report: '举报删除',
+    }[report_type];
+    let item_type_str = { post: '树洞', comment: '评论' }[item_type];
+
+    let reason;
+    if (
+      report_type === 'fold' ||
+      (report_type === 'set_tag' && fold_reason !== 'others')
+    ) {
+      reason = fold_reason;
+      if (reason === 'select') return;
+      if (
+        !window.confirm(
+          `确认因为 ${reason} 举报折叠 ${item_type_str} #${id} 吗？`,
+        )
+      )
+        return;
+    } else if (report_type === 'report') {
+      reason = window.prompt(
+        `举报删除` + item_type_str + ' #' + id + ' 的理由：',
+      );
+      if (!reason) return;
+    } else {
+      reason = window.prompt(
+        `${report_type_str}` + item_type_str + ' #' + id + ' 的理由：',
+      );
+      if (!reason) return;
+      if (
+        !window.confirm(
+          `确认因为 ${reason} 的理由 ${report_type_str} ${item_type_str} #${id} 吗？`,
+        )
+      )
+        return;
+    }
+    console.log(
+      `item_type ${item_type}, id ${id}, report_type ${report_type}, reason ${reason}`,
+    );
+    let token = localStorage['TOKEN'];
+    API.report(item_type, id, report_type, reason, token)
+      .then((json) => {
+        alert(`${report_type_str}成功`);
+      })
+      .catch((e) => {
+        alert('举报失败：' + e);
+        console.error(e);
+      });
+  }
+
+  return (
+    <div className="interactive flow-item-toolbar report-toolbar">
+      {!props.info.permissions.includes('set_tag') &&
+        props.info.permissions.includes('fold') && (
+          <p>
+            <button onClick={() => report('fold')}>折叠</button>
+            <select
+              value={fold_reason}
+              onChange={(e) => set_fold_reason(e.target.value)}
+            >
+              <option value="select">选择理由……</option>
+              {fold_tags.map(
+                (tag, i) =>
+                  !['折叠', '举报较多'].includes(tag) && (
+                    <option key={i} value={tag}>
+                      #{tag}
+                    </option>
+                  ),
+              )}
+            </select>
+          </p>
+        )}
+      {!props.info.permissions.includes('delete') &&
+        !props.info.permissions.includes('undelete_unban') &&
+        props.info.permissions.includes('report') && (
+          <p>
+            <button onClick={() => report('report')}>删除</button>
+            <span className="report-reason">
+              这条{props.is_reply ? '回复' : '树洞'}违反
+              <a href="https://thuhole.com/policy.html" target="_blank">
+                社区规范
+              </a>
+              ，应被禁止
+            </span>
+          </p>
+        )}
+      {props.info.permissions.includes('delete') && (
+        <p>
+          <button onClick={() => report('delete')}>
+            {props.info.permissions.includes('delete_ban') ? '删除' : '撤回'}
+          </button>
+          <span className="report-reason">
+            {props.info.permissions.includes('delete_ban')
+              ? '没有禁言惩罚的删除。'
+              : '树洞发送两分钟内可以撤回，不会禁言。'}
+          </span>
+        </p>
+      )}
+      {props.info.permissions.includes('undelete_unban') && (
+        <p>
+          <button onClick={() => report('undelete_unban')}>撤销删除</button>
+          <span className="report-reason">
+            撤销删除并解除禁言（如果存在禁言的话）
+          </span>
+        </p>
+      )}
+      {props.info.permissions.includes('delete_ban') && (
+        <p>
+          <button onClick={() => report('delete_ban')}>删帖禁言</button>
+          <span className="report-reason">
+            删除并禁言。删除理由会通知用户。
+          </span>
+        </p>
+      )}
+      {props.info.permissions.includes('unban') && (
+        <p>
+          <button onClick={() => report('unban')}>解封</button>
+          <span className="report-reason">解封，但不撤销删除</span>
+        </p>
+      )}
+      {props.info.permissions.includes('set_tag') && (
+        <p>
+          <button onClick={() => report('set_tag')}>打tag</button>
+          <select
+            value={fold_reason}
+            onChange={(e) => set_fold_reason(e.target.value)}
+          >
+            <option value="select">选择理由……</option>
+            {fold_tags.map(
+              (tag, i) =>
+                !['举报较多'].includes(tag) && (
+                  <option key={i} value={tag}>
+                    #{tag}
+                  </option>
+                ),
+            )}
+            <option value="">无tag</option>
+            <option value="others">其他</option>
+          </select>
+        </p>
+      )}
+    </div>
+  );
 }
 
 class FlowItem extends PureComponent {
@@ -293,40 +448,13 @@ class FlowItem extends PureComponent {
           </div>
         )}
         <div className="box">
-          {!!window.LATEST_POST_ID &&
-            parseInt(props.info.pid, 10) > window.LATEST_POST_ID && (
-              <div className="flow-item-dot" />
-            )}
-          {!!this.props.attention && !this.props.cached && (
-            <div className="flow-item-dot" />
-          )}
+          {!!window.LATEST_POST_ID && props.info.pid > window.LATEST_POST_ID ? (
+            <div className="flow-item-dot flow-item-dot-post" />
+          ) : props.info.variant.new_reply ? (
+            <div className="flow-item-dot flow-item-dot-comment" />
+          ) : null}
           <div className="box-header">
-            {!!this.props.do_filter_name && (
-              <span
-                className="reply-header-badge clickable"
-                onClick={() => {
-                  this.props.do_filter_name(DZ_NAME);
-                }}
-              >
-                <span className="icon icon-locate" />
-              </span>
-            )}
-            {!!parseInt(props.info.likenum, 10) && (
-              <span className="box-header-badge">
-                {props.info.likenum}&nbsp;
-                <span
-                  className={
-                    'icon icon-' + (props.attention ? 'star-ok' : 'star')
-                  }
-                />
-              </span>
-            )}
-            {!!parseInt(props.info.reply, 10) && (
-              <span className="box-header-badge">
-                {props.info.reply}&nbsp;
-                <span className="icon icon-reply" />
-              </span>
-            )}
+            {props.header_badges}
             <code className="box-id">
               <a
                 href={'##' + props.info.pid}
@@ -339,19 +467,30 @@ class FlowItem extends PureComponent {
             {props.info.tag !== null && props.info.tag !== '折叠' && (
               <span className="box-header-tag">{props.info.tag}</span>
             )}
-            <Time stamp={props.info.timestamp} short={!props.img_clickable} />
+            <Time stamp={props.info.timestamp} short={!props.in_sidebar} />
           </div>
+          {props.info.deleted && (
+            <p key="deleted-hint" className="flow-variant-warning">
+              （已删除）
+            </p>
+          )}
+          {props.info.variant.report_widget && props.in_sidebar && (
+            <ReportWidget
+              key="report"
+              info={props.info}
+              is_reply={false}
+              set_variant={props.set_variant}
+            />
+          )}
           <div className="box-content">
             <HighlightedMarkdown
               text={props.info.text}
               color_picker={props.color_picker}
+              search_param={props.search_param}
               show_pid={props.show_pid}
             />
             {props.info.type === 'image' && (
-              <ImageViewer
-                img_clickable={props.img_clickable}
-                url={props.info.url}
-              />
+              <ImageViewer in_sidebar={props.in_sidebar} url={props.info.url} />
             )}
             {/*{props.info.type==='audio' && <AudioWidget src={AUDIO_BASE+props.info.url} />}*/}
           </div>
@@ -371,7 +510,6 @@ class FlowSidebar extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      attention: props.attention,
       info: props.info,
       replies: props.replies,
       loading_status: 'done',
@@ -413,41 +551,30 @@ class FlowSidebar extends PureComponent {
     );
   }
 
-  load_replies(update_count = true) {
+  load_replies() {
     this.setState({
       loading_status: 'loading',
       error_msg: null,
     });
-    API.load_replies(
-      this.state.info.pid,
-      this.props.token,
-      this.color_picker,
-      null,
-    )
+    API.load_replies(this.state.info.pid, this.props.token, this.color_picker)
       .then((json) => {
         this.setState(
-          (prev, props) => ({
+          {
             replies: json.data,
-            info: update_count
-              ? Object.assign({}, prev.info, {
-                  reply: '' + json.data.length,
-                })
-              : prev.info,
-            attention: !!json.attention,
+            info: json.post,
             loading_status: 'done',
             error_msg: null,
-          }),
+          },
           () => {
             this.syncState({
-              replies: this.state.replies,
-              attention: this.state.attention,
-              info: this.state.info,
+              replies: json.data,
+              info: json.post,
             });
-            if (this.state.replies.length)
+            if (json.data.length)
               this.set_variant(null, {
                 latest_reply: Math.max.apply(
                   null,
-                  this.state.replies.map((r) => parseInt(r.timestamp)),
+                  this.state.replies.map((r) => r.timestamp),
                 ),
               });
           },
@@ -467,15 +594,24 @@ class FlowSidebar extends PureComponent {
     this.setState({
       loading_status: 'loading',
     });
-    const next_attention = !this.state.attention;
+    const next_attention = !this.state.info.attention;
     API.set_attention(this.state.info.pid, next_attention, this.props.token)
       .then((json) => {
+        if (json.data.length)
+          json.data.variant = {
+            latest_reply: Math.max.apply(
+              null,
+              json.data.map((r) => r.timestamp),
+            ),
+          };
+        else json.data.variant = {};
+
         this.setState({
           loading_status: 'done',
-          attention: next_attention,
+          info: json.data,
         });
         this.syncState({
-          attention: next_attention,
+          info: json.data,
         });
       })
       .catch((e) => {
@@ -487,24 +623,6 @@ class FlowSidebar extends PureComponent {
       });
   }
 
-  report() {
-    let reason = prompt(`举报 #${this.state.info.pid} 的理由：`);
-    if (reason !== null) {
-      API.report(this.state.info.pid, reason, this.props.token)
-        .then((json) => {
-          if (json.code !== 0) {
-            // if (json.msg) alert(json.msg);
-            throw new Error(JSON.stringify(json));
-          }
-          alert('举报成功');
-        })
-        .catch((e) => {
-          alert('举报失败');
-          console.error(e);
-        });
-    }
-  }
-
   set_filter_name(name) {
     this.setState((prevState) => ({
       filter_name: name === prevState.filter_name ? null : name,
@@ -512,11 +630,16 @@ class FlowSidebar extends PureComponent {
   }
 
   toggle_rev() {
-    this.setState((prevState) => ({ rev: !prevState.rev }), forceCheck);
+    this.setState((prevState) => ({
+      rev: !prevState.rev,
+    }));
   }
 
   show_reply_bar(name, event) {
-    if (this.reply_ref.current && !event.target.closest('a, .clickable')) {
+    if (
+      this.reply_ref.current &&
+      !event.target.closest('a, .clickable, .interactive')
+    ) {
       let text = this.reply_ref.current.get();
       if (
         /^\s*(?:Re (?:|洞主|(?:[A-Z][a-z]+ )?(?:[A-Z][a-z]+)|You Win(?: \d+)?):)?\s*$/.test(
@@ -532,7 +655,7 @@ class FlowSidebar extends PureComponent {
     }
   }
 
-  render() {
+  render_self() {
     if (this.state.loading_status === 'loading')
       return <p className="box box-tip">加载中……</p>;
 
@@ -543,10 +666,9 @@ class FlowSidebar extends PureComponent {
       : this.state.replies.slice();
     if (this.state.rev) replies_to_show.reverse();
 
-    // may not need key, for performance
     // key for lazyload elem
-    // let view_mode_key =
-    //   (this.state.rev ? 'y-' : 'n-') + (this.state.filter_name || 'null');
+    let view_mode_key =
+      (this.state.rev ? 'y-' : 'n-') + (this.state.filter_name || 'null');
 
     let replies_cnt = { [DZ_NAME]: 1 };
     replies_to_show.forEach((r) => {
@@ -564,16 +686,49 @@ class FlowSidebar extends PureComponent {
         >
           <FlowItem
             info={this.state.info}
-            attention={this.state.attention}
-            img_clickable={true}
+            in_sidebar={true}
             color_picker={this.color_picker}
             show_pid={show_pid}
             replies={this.state.replies}
             set_variant={(variant) => {
               this.set_variant(null, variant);
             }}
-            do_filter_name={
-              replies_cnt[DZ_NAME] > 1 ? this.set_filter_name.bind(this) : null
+            header_badges={
+              <>
+                {this.state.info.permissions.length > 0 &&
+                  (!this.state.info.variant.report_widget ? (
+                    <span
+                      className="reply-header-badge clickable"
+                      onClick={() => {
+                        this.set_variant(null, { report_widget: true });
+                      }}
+                    >
+                      <span className="icon icon-flag" />
+                      <label>举报</label>
+                    </span>
+                  ) : (
+                    <span
+                      className="reply-header-badge clickable"
+                      onClick={() => {
+                        this.set_variant(null, { report_widget: false });
+                      }}
+                    >
+                      <span className="icon icon-flag" />
+                      <label>取消</label>
+                    </span>
+                  ))}
+                {replies_cnt[DZ_NAME] > 1 && (
+                  <span
+                    className="reply-header-badge clickable"
+                    onClick={() => {
+                      this.set_filter_name(DZ_NAME);
+                    }}
+                  >
+                    <span className="icon icon-locate" />
+                    <label>只看</label>
+                  </span>
+                )}
+              </>
             }
           />
         </ClickHandler>
@@ -582,15 +737,6 @@ class FlowSidebar extends PureComponent {
     return (
       <div className="flow-item-row sidebar-flow-item">
         <div className="box box-tip">
-          {!!this.props.token && (
-            <span>
-              <a onClick={this.report.bind(this)}>
-                <span className="icon icon-flag" />
-                <label>举报</label>
-              </a>
-              &nbsp;&nbsp;
-            </span>
-          )}
           <a onClick={this.load_replies.bind(this)}>
             <span className="icon icon-refresh" />
             <label>刷新</label>
@@ -599,33 +745,30 @@ class FlowSidebar extends PureComponent {
             <span>
               &nbsp;&nbsp;
               <a onClick={this.toggle_rev.bind(this)}>
-                <span className="icon icon-order-rev" />
-                <label>{this.state.rev ? '还原' : '逆序'}</label>
+                <span
+                  className={
+                    'icon icon-order-rev' + (this.state.rev ? '-down' : '')
+                  }
+                />
+                <label>{this.state.info.reply} 回复</label>
               </a>
             </span>
           )}
-          {!!this.props.token && (
+          &nbsp;&nbsp;
+          <a
+            onClick={() => {
+              this.toggle_attention();
+            }}
+          >
             <span>
-              &nbsp;&nbsp;
-              <a
-                onClick={() => {
-                  this.toggle_attention();
-                }}
-              >
-                {this.state.attention ? (
-                  <span>
-                    <span className="icon icon-star-ok" />
-                    <label>已关注</label>
-                  </span>
-                ) : (
-                  <span>
-                    <span className="icon icon-star" />
-                    <label>未关注</label>
-                  </span>
-                )}
-              </a>
+              <span
+                className={
+                  'icon icon-star' + (this.state.info.attention ? '-ok' : '')
+                }
+              />
+              <label>{this.state.info.likenum} 关注</label>
             </span>
-          )}
+          </a>
         </div>
         {!!this.state.filter_name && (
           <div className="box box-tip flow-item filter-name-bar">
@@ -656,14 +799,6 @@ class FlowSidebar extends PureComponent {
             <p>{this.state.error_msg}</p>
           </div>
         )}
-        {this.props.deletion_detect &&
-          parseInt(this.state.info.reply) > this.state.replies.length &&
-          !!this.state.replies.length && (
-            <div className="box box-tip flow-item box-danger">
-              {parseInt(this.state.info.reply) - this.state.replies.length}{' '}
-              条回复被删除
-            </div>
-          )}
         {replies_to_show.map((reply, i) => (
           <LazyLoad
             key={i}
@@ -681,14 +816,50 @@ class FlowSidebar extends PureComponent {
                 info={reply}
                 color_picker={this.color_picker}
                 show_pid={show_pid}
+                in_sidebar={true}
                 set_variant={(variant) => {
                   this.set_variant(reply.cid, variant);
                 }}
-                img_clickable={true}
-                do_filter_name={
-                  replies_cnt[reply.name] > 1
-                    ? this.set_filter_name.bind(this)
-                    : null
+                header_badges={
+                  <>
+                    {reply.permissions.length > 0 &&
+                      (!reply.variant.report_widget ? (
+                        <span
+                          className="reply-header-badge clickable"
+                          onClick={() => {
+                            this.set_variant(reply.cid, {
+                              report_widget: true,
+                            });
+                          }}
+                        >
+                          <span className="icon icon-flag" />
+                          {/*<label>举报</label>*/}
+                        </span>
+                      ) : (
+                        <span
+                          className="reply-header-badge clickable"
+                          onClick={() => {
+                            this.set_variant(reply.cid, {
+                              report_widget: false,
+                            });
+                          }}
+                        >
+                          <span className="icon icon-flag" />
+                          <label>取消</label>
+                        </span>
+                      ))}
+                    {replies_cnt[reply.name] > 1 && (
+                      <span
+                        className="reply-header-badge clickable"
+                        onClick={() => {
+                          this.set_filter_name(reply.name);
+                        }}
+                      >
+                        <span className="icon icon-locate" />
+                        {/*<label>只看</label>*/}
+                      </span>
+                    )}
+                  </>
                 }
               />
             </ClickHandler>
@@ -709,6 +880,21 @@ class FlowSidebar extends PureComponent {
       </div>
     );
   }
+
+  render() {
+    return (
+      <SwitchTransition mode="out-in">
+        <CSSTransition
+          key={this.state.loading_status}
+          timeout={100}
+          classNames="flows-anim"
+          appear={true}
+        >
+          {this.render_self()}
+        </CSSTransition>
+      </SwitchTransition>
+    );
+  }
 }
 
 class FlowItemRow extends PureComponent {
@@ -718,10 +904,9 @@ class FlowItemRow extends PureComponent {
       fold_tags.indexOf(props.info.tag) > -1 &&
       (props.search_param === '热榜' || !props.search_param) &&
       window.config.fold &&
-      props.mode !== 'attention' &&
-      props.mode !== 'attention_finished';
+      !props.info.attention;
     this.state = {
-      replies: [],
+      replies: props.replies || [],
       reply_status: 'done',
       reply_error: null,
       info: Object.assign({}, props.info, { variant: {} }),
@@ -729,16 +914,13 @@ class FlowItemRow extends PureComponent {
         window.config.block_words.some((word) =>
           props.info.text.includes(word),
         ) || this.needFold,
-      attention:
-        props.attention_override === null ? false : props.attention_override,
-      cached: true, // default no display anything
     };
-    this.color_picker = new ColorPicker();
+    this.color_picker = this.props.color_picker || new ColorPicker();
   }
 
   componentDidMount() {
-    if (parseInt(this.state.info.reply, 10)) {
-      this.load_replies(null, /*update_count=*/ false);
+    if (this.state.info.reply && this.state.replies.length === 0) {
+      this.load_replies(null, /*update_post=*/ false);
     }
   }
 
@@ -746,7 +928,7 @@ class FlowItemRow extends PureComponent {
   //   this.setState({ hidden: false });
   // }
 
-  load_replies(callback, update_count = true) {
+  load_replies(callback, update_post = true) {
     console.log('fetching reply', this.state.info.pid);
     this.setState({
       reply_status: 'loading',
@@ -756,27 +938,25 @@ class FlowItemRow extends PureComponent {
       this.state.info.pid,
       this.props.token,
       this.color_picker,
-      parseInt(this.state.info.reply),
+      this.state.info.updated_at,
     )
-      .then(({ data: json, cached }) => {
+      .then((json) => {
         this.setState(
-          (prev, props) => ({
+          (prev) => ({
             replies: json.data,
-            info: Object.assign({}, prev.info, {
-              reply: update_count ? '' + json.data.length : prev.info.reply,
-              variant: json.data.length
-                ? {
-                    latest_reply: Math.max.apply(
-                      null,
-                      json.data.map((r) => parseInt(r.timestamp)),
-                    ),
-                  }
-                : {},
-            }),
-            attention: !!json.attention,
+            info: {
+              ...(update_post ? json.post : prev.info),
+              variant: {
+                ...(prev.info.variant || {}),
+                ...json.post.variant,
+                latest_reply: Math.max.apply(
+                  null,
+                  json.data.map((r) => r.timestamp),
+                ),
+              },
+            },
             reply_status: 'done',
             reply_error: null,
-            cached,
           }),
           callback,
         );
@@ -801,12 +981,10 @@ class FlowItemRow extends PureComponent {
         key={+new Date()}
         info={this.state.info}
         replies={this.state.replies}
-        attention={this.state.attention}
         sync_state={this.setState.bind(this)}
         token={this.props.token}
         show_sidebar={this.props.show_sidebar}
         color_picker={this.color_picker}
-        deletion_detect={this.props.deletion_detect}
       />,
     );
   }
@@ -822,14 +1000,6 @@ class FlowItemRow extends PureComponent {
       ['pid', PID_RE],
       ['nickname', NICKNAME_RE],
     ];
-    if (this.props.search_param) {
-      hl_rules.push([
-        'search',
-        !!this.props.search_param.match(/\/.+\//)
-          ? build_highlight_re(this.props.search_param, ' ', 'gi', true) // Use regex
-          : build_highlight_re(this.props.search_param, ' ', 'gi'), // Don't use regex
-      ]);
-    }
     let parts = split_text(this.state.info.text, hl_rules);
 
     let quote_id = null;
@@ -839,7 +1009,8 @@ class FlowItemRow extends PureComponent {
         if (
           mode === 'pid' &&
           QUOTE_BLACKLIST.indexOf(content) === -1 &&
-          parseInt(content) < parseInt(this.state.info.pid)
+          (parseInt(content) < parseInt(this.state.info.pid) ||
+            ADMIN_COMMANDS.includes(this.props.search_param))
         )
           if (quote_id === null) quote_id = parseInt(content);
           else {
@@ -848,27 +1019,96 @@ class FlowItemRow extends PureComponent {
           }
       }
 
+    let showing_replies;
+    if (
+      this.props.search_param &&
+      this.props.search_param !== '' + this.state.info.pid &&
+      this.props.search_param !== '热榜'
+    ) {
+      // filter replies based on search param
+      let search_terms = this.props.search_param.split(' ');
+      let shown_results = 0;
+      showing_replies = this.state.replies
+        .map((reply) => {
+          if (shown_results >= PREVIEW_REPLY_COUNT) return null;
+          if (
+            search_hit(reply.text, search_terms) ||
+            (reply.deleted && this.props.search_param === 'deleted')
+          ) {
+            shown_results++;
+            return (
+              <Reply
+                key={reply.cid}
+                info={reply}
+                color_picker={this.color_picker}
+                search_param={this.props.search_param}
+                show_pid={show_pid}
+                header_badges={null}
+                in_sidebar={false}
+                set_variant={(v) => {}}
+              />
+            );
+          } else return null;
+        })
+        .filter((x) => x !== null);
+    } // show all replies
+    else
+      showing_replies = this.state.replies
+        .slice(0, PREVIEW_REPLY_COUNT)
+        .map((reply) => (
+          <Reply
+            key={reply.cid}
+            info={reply}
+            color_picker={this.color_picker}
+            search_param={this.props.search_param}
+            show_pid={show_pid}
+            header_badges={null}
+            in_sidebar={false}
+            set_variant={(v) => {}}
+          />
+        ));
+
     let res = (
       <div
         className={
           'flow-item-row flow-item-row-with-prompt' +
           (this.props.is_quote ? ' flow-item-row-quote' : '')
         }
-        onClick={(event) => {
-          if (!CLICKABLE_TAGS[event.target.tagName.toLowerCase()])
+        onClick={(e) => {
+          if (!CLICKABLE_TAGS[e.target.tagName.toLowerCase()])
             this.show_sidebar();
         }}
       >
         <FlowItem
-          parts={parts}
           info={this.state.info}
-          attention={this.state.attention}
-          img_clickable={false}
+          in_sidebar={false}
           is_quote={this.props.is_quote}
           color_picker={this.color_picker}
+          search_param={this.props.search_param}
           show_pid={show_pid}
           replies={this.state.replies}
-          cached={this.state.cached}
+          set_variant={(v) => {}}
+          header_badges={
+            <>
+              {!!this.state.info.likenum && (
+                <span className="box-header-badge">
+                  {this.state.info.likenum}&nbsp;
+                  <span
+                    className={
+                      'icon icon-' +
+                      (this.state.info.attention ? 'star-ok' : 'star')
+                    }
+                  />
+                </span>
+              )}
+              {!!this.state.info.reply && (
+                <span className="box-header-badge">
+                  {this.state.info.reply}&nbsp;
+                  <span className="icon icon-reply" />
+                </span>
+              )}
+            </>
+          }
         />
         <div className="flow-reply-row">
           {this.state.reply_status === 'loading' && (
@@ -888,15 +1128,7 @@ class FlowItemRow extends PureComponent {
               <p>{this.state.reply_error}</p>
             </div>
           )}
-          {this.state.replies.slice(0, PREVIEW_REPLY_COUNT).map((reply) => (
-            <Reply
-              key={reply.cid}
-              info={reply}
-              img_clickable={false}
-              color_picker={this.color_picker}
-              show_pid={show_pid}
-            />
-          ))}
+          {showing_replies}
           {this.state.replies.length > PREVIEW_REPLY_COUNT && (
             <div className="box box-tip">
               还有 {this.state.replies.length - PREVIEW_REPLY_COUNT} 条
@@ -932,16 +1164,16 @@ class FlowItemRow extends PureComponent {
             )}
             <div className="box">
               <div className="box-header">
-                {!!this.props.do_filter_name && (
-                  <span
-                    className="reply-header-badge clickable"
-                    onClick={() => {
-                      this.props.do_filter_name(DZ_NAME);
-                    }}
-                  >
-                    <span className="icon icon-locate" />
-                  </span>
-                )}
+                {/*{!!this.props.do_filter_name && (*/}
+                {/*  <span*/}
+                {/*    className="reply-header-badge clickable"*/}
+                {/*    onClick={() => {*/}
+                {/*      this.props.do_filter_name(DZ_NAME);*/}
+                {/*    }}*/}
+                {/*  >*/}
+                {/*    <span className="icon icon-locate" />*/}
+                {/*  </span>*/}
+                {/*)}*/}
                 <code className="box-id">#{this.props.info.pid}</code>
                 &nbsp;
                 {this.props.info.tag !== null &&
@@ -969,7 +1201,6 @@ class FlowItemRow extends PureComponent {
           pid={quote_id}
           show_sidebar={this.props.show_sidebar}
           token={this.props.token}
-          deletion_detect={this.props.deletion_detect}
         />
       </div>
     ) : (
@@ -986,6 +1217,7 @@ class FlowItemQuote extends PureComponent {
       error_msg: null,
       info: null,
     };
+    this.color_picker = new ColorPicker();
   }
 
   componentDidMount() {
@@ -998,15 +1230,15 @@ class FlowItemQuote extends PureComponent {
         loading_status: 'loading',
       },
       () => {
-        API.get_single(this.props.pid, this.props.token)
+        API.load_replies(this.props.pid, this.props.token, this.color_picker)
           .then((json) => {
             this.setState({
               loading_status: 'done',
-              info: json.data,
+              info: json,
             });
           })
           .catch((err) => {
-            if (('' + err).indexOf('没有这条树洞') !== -1)
+            if (('' + err).indexOf('找不到该树洞') !== -1)
               this.setState({
                 loading_status: 'empty',
               });
@@ -1046,12 +1278,12 @@ class FlowItemQuote extends PureComponent {
     else
       return (
         <FlowItemRow
-          info={this.state.info}
-          mode={this.props.mode}
+          info={this.state.info.post}
+          replies={this.state.info.data}
+          color_picker={this.color_picker}
           show_sidebar={this.props.show_sidebar}
           token={this.props.token}
           is_quote={true}
-          deletion_detect={this.props.deletion_detect}
         />
       );
   }
@@ -1071,28 +1303,12 @@ function FlowChunk(props) {
               hiddenIfInvisible={false}
             >
               <div>
-                {!!(
-                  props.deletion_detect &&
-                  props.mode === 'list' &&
-                  ind &&
-                  props.list[ind - 1].pid - info.pid > 1
-                ) && (
-                  <div className="flow-item-row">
-                    <div className="box box-tip flow-item box-danger">
-                      {props.list[ind - 1].pid - info.pid - 1} 条被删除
-                    </div>
-                  </div>
-                )}
                 <FlowItemRow
                   info={info}
-                  mode={props.mode}
                   show_sidebar={props.show_sidebar}
                   token={token}
-                  attention_override={
-                    props.mode === 'attention_finished' ? true : null
-                  }
-                  deletion_detect={props.deletion_detect}
                   search_param={props.search_param}
+                  color_picker={null}
                 />
               </div>
             </LazyLoad>
@@ -1149,7 +1365,7 @@ export class Flow extends PureComponent {
               if (json.config) {
                 localStorage['img_base_url'] = json.config.img_base_url;
                 localStorage['img_base_url_bak'] = json.config.img_base_url_bak;
-                fold_tags = JSON.stringify(json.config.fold_tags);
+                fold_tags = json.config.fold_tags;
                 if (json.config.announcement) {
                   announcement = json.config.announcement;
                 }
@@ -1171,6 +1387,7 @@ export class Flow extends PureComponent {
                 }
               }
             }
+            const finished = json.data.length === 0;
             this.setState((prev, props) => ({
               chunks: {
                 title: 'News Feed',
@@ -1185,6 +1402,7 @@ export class Flow extends PureComponent {
                 ),
               },
               announcement: announcement,
+              mode: finished ? 'list_finished' : 'list',
               loading_status: 'done',
             }));
           })
@@ -1213,12 +1431,12 @@ export class Flow extends PureComponent {
           .catch(failed);
       } else if (this.state.mode === 'single') {
         const pid = parseInt(this.state.search_param.substr(1), 10);
-        API.get_single(pid, this.props.token)
+        API.load_replies(pid, this.props.token, new ColorPicker())
           .then((json) => {
             this.setState({
               chunks: {
                 title: 'PID = ' + pid,
-                data: [json.data],
+                data: [json.post],
               },
               mode: 'single_finished',
               loading_status: 'done',
@@ -1227,43 +1445,54 @@ export class Flow extends PureComponent {
           .catch(failed);
       } else if (this.state.mode === 'attention') {
         let use_search = !!this.state.search_param;
-        let use_regex = use_search && !!this.state.search_param.match(/\/.+\//);
-        let regex_search = /.+/;
-        if (use_regex) {
-          try {
-            regex_search = new RegExp(this.state.search_param.slice(1, -1));
-          } catch (e) {
-            alert(`请检查正则表达式合法性！\n${e}`);
-            regex_search = /.+/;
-          }
+        if (use_search) {
+          API.get_search(page, this.state.search_param, this.props.token, true)
+            .then((json) => {
+              const finished = json.data.length === 0;
+              this.setState((prev, props) => ({
+                chunks: {
+                  title:
+                    'Result for "' +
+                    this.state.search_param +
+                    '" in Attention List',
+                  data: prev.chunks.data.concat(
+                    json.data.filter(
+                      (x) =>
+                        prev.chunks.data.length === 0 ||
+                        !prev.chunks.data
+                          .slice(-100)
+                          .some((p) => p.pid === x.pid),
+                    ),
+                  ),
+                },
+                mode: finished ? 'attention_finished' : 'attention',
+                loading_status: 'done',
+              }));
+            })
+            .catch(failed);
+        } else {
+          API.get_attention(page, this.props.token)
+            .then((json) => {
+              const finished = json.data.length === 0;
+              this.setState((prev, props) => ({
+                chunks: {
+                  title: 'Attention List',
+                  data: prev.chunks.data.concat(
+                    json.data.filter(
+                      (x) =>
+                        prev.chunks.data.length === 0 ||
+                        !prev.chunks.data
+                          .slice(-100)
+                          .some((p) => p.pid === x.pid),
+                    ),
+                  ),
+                },
+                mode: finished ? 'attention_finished' : 'attention',
+                loading_status: 'done',
+              }));
+            })
+            .catch(failed);
         }
-        console.log(use_search, use_regex);
-        API.get_attention(this.props.token)
-          .then((json) => {
-            this.setState({
-              chunks: {
-                title: `${
-                  use_search
-                    ? use_regex
-                      ? `Result for RegEx ${regex_search.toString()} in `
-                      : `Result for "${this.state.search_param}" in `
-                    : ''
-                }Attention List`,
-                data: !use_search
-                  ? json.data
-                  : !use_regex
-                  ? json.data.filter((post) => {
-                      return this.state.search_param
-                        .split(' ')
-                        .every((keyword) => post.text.includes(keyword));
-                    }) // Not using regex
-                  : json.data.filter((post) => !!post.text.match(regex_search)), // Using regex
-              },
-              mode: 'attention_finished',
-              loading_status: 'done',
-            });
-          })
-          .catch(failed);
       } else {
         console.log('nothing to load');
         return;

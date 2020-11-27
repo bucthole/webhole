@@ -24,7 +24,7 @@ export class MessageViewer extends PureComponent {
       () => {
         fetch(
           THUHOLE_API_ROOT +
-            'api_xmcp/hole/system_msg?user_token=' +
+            'contents/system_msg?user_token=' +
             encodeURIComponent(this.props.token) +
             API_VERSION_PARAM(),
         )

@@ -25,13 +25,12 @@
 }
 
 .box-danger {
-    background-color: #e55;
-    color: white;
-    text-shadow: 0 0 3px black;
-}
-
-.root-dark-mode .box-danger {
     background-color: #d44;
+    color: white;
+    text-shadow: 0 0 2px black;
+}
+.root-dark-mode .box-danger {
+    background-color: #c44;
     color: var(--foreground-dark);
 }
 
@@ -50,6 +49,23 @@
     color: black;
     --var-link-color: #00c;
         /*text-shadow: 0 0 1px black;*/
+}
+
+.box-warning {
+    background-color: #db8e14;
+    color: white;
+    text-shadow: 0 0 2px black;
+}
+.root-dark-mode .box-warning {
+    background-color: #b47209;
+    text-shadow: 0 0 2px black;
+}
+
+.box-danger a, .box-warning a {
+    color: #ddf;
+}
+.box-danger a:hover, .box-warning a:hover {
+    border-bottom: 1px solid #ddf;
 }
 
 .left-container .flow-item {
@@ -171,6 +187,7 @@
     max-width: 100%;
     box-shadow: 0 1px 5px rgba(0,0,0,.4);
 }
+
 .left-container .flow-item-row p.img img {
     max-height: 80vh;
 }
@@ -186,19 +203,28 @@
 
 .flow-item-dot {
     position: relative;
-    top: calc(-.5em - 4px);
-    left: calc(-.5em - 4px);
-    width: 10px;
-    height: 10px;
-    margin-bottom: -10px;
+    top: calc(-.5em - 3px);
+    left: calc(-.5em - 3px);
+    width: 9px;
+    height: 9px;
+    margin-bottom: -9px;
     border-radius: 50%;
-    background-color: #ffcc77;
     box-shadow: 1px 1px 5px rgba(0,0,0,.5);
     display: none;
 }
 
-.root-dark-mode .flow-item-dot {
+.flow-item-dot-post {
+    background-color: #ffcc77;
+}
+.root-dark-mode .flow-item-dot-post {
     background-color: #eebb66;
+}
+
+.flow-item-dot-comment {
+    background-color: #aaddff;
+}
+.root-dark-mode .flow-item-dot-comment {
+    background-color: #99ccee;
 }
 
 .left-container .flow-item-dot {
@@ -240,8 +266,8 @@
 }
 
 .flow-item-row-quote {
-    opacity: .8;
-    filter: brightness(95%);
+    opacity: .9;
+    filter: brightness(90%);
 }
 
 .root-dark-mode .flow-item-row-quote {
@@ -295,8 +321,36 @@
     100% {opacity: 1;}
 }
 
+
 .reply-header-badge {
     float: right;
-    padding: 0 .5em;
-    opacity: .4;
+    padding: .5em .2em .5em .2em;
+    margin: -.5em -.2em -.5em .2em;
+    opacity: .45;
+}
+.reply-header-badge:hover {
+    opacity: 1;
+}
+
+.flow-variant-warning {
+    color: red;
+    font-weight: bold;
+}
+
+.report-toolbar button {
+    line-height: 2em;
+    margin: .2em .5em .2em 0;
+    min-width: 4em;
+}
+.report-reason {
+    font-size: .9em;
+}
+
+.flow-hint {
+    opacity: .6;
+    font-size: .8em;
+}
+
+.box-header-text {
+    opacity: .6;
 }

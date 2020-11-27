@@ -1,9 +1,9 @@
-const HOLE_CACHE_DB_NAME = 'hole_cache_db';
+const HOLE_CACHE_DB_NAME = 'hole_v2_cache_db';
 const CACHE_DB_VER = 1;
 const MAINTENANCE_STEP = 150;
 const MAINTENANCE_COUNT = 1000;
 
-const ENC_KEY = 42;
+//const ENC_KEY=42;
 
 class Cache {
   constructor() {
@@ -31,40 +31,47 @@ class Cache {
   // use window.hole_cache.encrypt() only after cache is loaded!
   encrypt(pid, data) {
     let s = JSON.stringify(data);
-    let o = '';
-    for (let i = 0, key = (ENC_KEY ^ pid) % 128; i < s.length; i++) {
-      let c = s.charCodeAt(i);
-      let new_key = (key ^ (c / 2)) % 128;
-      o += String.fromCharCode(key ^ s.charCodeAt(i));
-      key = new_key;
-    }
-    return o;
+    return s;
+    /*
+        let o='';
+        for(let i=0,key=(ENC_KEY^pid)%128;i<s.length;i++) {
+            let c=s.charCodeAt(i);
+            let new_key=(key^(c/2))%128;
+            o+=String.fromCharCode(key^s.charCodeAt(i));
+            key=new_key;
+        }
+        return o;
+        */
   }
 
   // use window.hole_cache.decrypt() only after cache is loaded!
   decrypt(pid, s) {
-    let o = '';
-    if (typeof s !== typeof 'str') return null;
+    return JSON.parse(s);
+    /*
+        let o='';
+        if(typeof(s)!==typeof('str'))
+            return null;
 
-    for (let i = 0, key = (ENC_KEY ^ pid) % 128; i < s.length; i++) {
-      let c = key ^ s.charCodeAt(i);
-      o += String.fromCharCode(c);
-      key = (key ^ (c / 2)) % 128;
-    }
+        for(let i=0,key=(ENC_KEY^pid)%128;i<s.length;i++) {
+            let c=key^s.charCodeAt(i);
+            o+=String.fromCharCode(c);
+            key=(key^(c/2))%128;
+        }
 
-    try {
-      return JSON.parse(o);
-    } catch (e) {
-      console.error('decrypt failed');
-      console.trace(e);
-      return null;
-    }
+        try {
+            return JSON.parse(o);
+        } catch(e) {
+            console.error('decrypt failed');
+            console.trace(e);
+            return null;
+        }
+         */
   }
 
   get(pid, target_version) {
     pid = parseInt(pid);
     return new Promise((resolve, reject) => {
-      if (!this.db) return resolve(null);
+      if (!this.db) return resolve([null, 'fail']);
       let get_req, store;
       try {
         const tx = this.db.transaction(['comment'], 'readwrite');
@@ -72,21 +79,21 @@ class Cache {
         get_req = store.get(pid);
       } catch (e) {
         // ios sometimes fail at here, just ignore it
-        console.exception(e);
-        resolve(null);
+        console.error(e);
+        resolve([null, 'fail']);
       }
       get_req.onsuccess = () => {
         let res = get_req.result;
         if (!res || !res.data_str) {
-          //console.log('comment cache miss '+pid);
-          resolve(null);
+          //console.log('comment cache miss',pid);
+          resolve([null, 'miss']);
         } else if (target_version === res.version) {
           // hit
           console.log('comment cache hit', pid);
           res.last_access = +new Date();
           store.put(res);
           let data = this.decrypt(pid, res.data_str);
-          resolve(data); // obj or null
+          resolve([data, 'hit']); // obj or null
         } else {
           // expired
           console.log(
@@ -98,13 +105,13 @@ class Cache {
             target_version,
           );
           store.delete(pid);
-          resolve(null);
+          resolve([null, 'expired']);
         }
       };
       get_req.onerror = (e) => {
         console.warn('comment cache indexeddb open failed');
         console.error(e);
-        resolve(null);
+        resolve([null, 'fail']);
       };
     });
   }
@@ -125,7 +132,7 @@ class Cache {
         if (++this.added_items_since_maintenance === MAINTENANCE_STEP)
           setTimeout(this.maintenance.bind(this), 1);
       } catch (e) {
-        console.exception(e);
+        console.error(e);
         return resolve();
       }
     });
@@ -141,10 +148,10 @@ class Cache {
         const store = tx.objectStore('comment');
         req = store.delete(pid);
       } catch (e) {
-        console.exception(e);
+        console.error(e);
         return resolve();
       }
-      console.log('comment cache delete', pid);
+      //console.log('comment cache delete',pid);
       req.onerror = () => {
         console.warn('comment cache delete failed ', pid);
         return resolve();
@@ -184,7 +191,7 @@ class Cache {
       indexedDB.deleteDatabase(HOLE_CACHE_DB_NAME);
       console.log('delete comment cache db');
     } catch (e) {
-      console.exception(e);
+      console.error(e);
     }
   }
 }

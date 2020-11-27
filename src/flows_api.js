@@ -1,6 +1,5 @@
-import { get_json, API_VERSION_PARAM } from './infrastructure/functions';
+import { API_VERSION_PARAM } from './infrastructure/functions';
 import { THUHOLE_API_ROOT } from './infrastructure/const';
-import { API_BASE } from './Common';
 import { cache } from './cache';
 
 export { THUHOLE_API_ROOT, API_VERSION_PARAM };
@@ -9,11 +8,29 @@ export function token_param(token) {
   return API_VERSION_PARAM() + (token ? '&user_token=' + token : '');
 }
 
-export { get_json };
+export function get_json(res) {
+  if (!res.ok) throw Error(`网络错误 ${res.status} ${res.statusText}`);
+  return res.text().then((t) => {
+    try {
+      return JSON.parse(t);
+    } catch (e) {
+      console.error('json parse error');
+      console.trace(e);
+      console.log(t);
+      throw new SyntaxError('JSON Parse Error ' + t.substr(0, 50));
+    }
+  });
+}
+
+function add_variant(li) {
+  li.forEach((item) => {
+    item.variant = {};
+  });
+}
 
 const SEARCH_PAGESIZE = 50;
 
-const handle_response = async (response, notify = false) => {
+const handle_response = async (response, notify = false, add_v = true) => {
   let json = await get_json(response);
   if (json.code !== 0) {
     if (json.msg) {
@@ -21,41 +38,60 @@ const handle_response = async (response, notify = false) => {
       else throw new Error(json.msg);
     } else throw new Error(JSON.stringify(json));
   }
+  if (add_v) {
+    add_variant(json.data);
+  }
   return json;
 };
 
-const parse_replies = (replies, color_picker) =>
-  replies
-    .sort((a, b) => parseInt(a.cid, 10) - parseInt(b.cid, 10))
-    .map((info) => {
-      info._display_color = color_picker.get(info.name);
-      info.variant = {};
-      return info;
-    });
-
 export const API = {
-  load_replies: async (pid, token, color_picker, cache_version) => {
+  load_replies: (pid, token, color_picker) => {
     pid = parseInt(pid);
-    let response = await fetch(
-      API_BASE + '/api.php?action=getcomment&pid=' + pid + token_param(token),
-    );
-    let json = await handle_response(response);
-    // Why delete then put ??
-    cache().put(pid, cache_version, json);
-    json.data = parse_replies(json.data, color_picker);
-    return json;
+    return fetch(
+      THUHOLE_API_ROOT + 'contents/post/detail?pid=' + pid + token_param(token),
+    )
+      .then(get_json)
+      .then((json) => {
+        if (json.code !== 0) {
+          throw new Error(json.msg);
+        }
+
+        cache().put(pid, json.post.updated_at, json);
+
+        // also change load_replies_with_cache!
+        json.post.variant = {};
+        json.data = json.data.map((info) => {
+          info._display_color = color_picker.get(info.name);
+          info.variant = {};
+          return info;
+        });
+
+        return json;
+      });
   },
 
-  load_replies_with_cache: async (pid, token, color_picker, cache_version) => {
+  load_replies_with_cache: (pid, token, color_picker, cache_version) => {
     pid = parseInt(pid);
-    let json = await cache().get(pid, cache_version);
-    if (json) {
-      json.data = parse_replies(json.data, color_picker);
-      return { data: json, cached: true };
-    } else {
-      json = await API.load_replies(pid, token, color_picker, cache_version);
-      return { data: json, cached: !json };
-    }
+    return cache()
+      .get(pid, cache_version)
+      .then(([json, reason]) => {
+        if (json) {
+          // also change load_replies!
+          json.post.variant = {};
+          json.data = json.data.map((info) => {
+            info._display_color = color_picker.get(info.name);
+            info.variant = {};
+            return info;
+          });
+
+          return json;
+        } else {
+          return API.load_replies(pid, token, color_picker).then((json) => {
+            if (reason === 'expired') json.post.variant.new_reply = true;
+            return json;
+          });
+        }
+      });
   },
 
   set_attention: async (pid, attention, token) => {
@@ -64,7 +100,7 @@ export const API = {
     data.append('pid', pid);
     data.append('switch', attention ? '1' : '0');
     let response = await fetch(
-      API_BASE + '/api.php?action=attention' + token_param(token),
+      THUHOLE_API_ROOT + 'edit/attention?' + token_param(token),
       {
         method: 'POST',
         headers: {
@@ -75,16 +111,18 @@ export const API = {
     );
     // Delete cache to update `attention` on next reload
     cache().delete(pid);
-    return handle_response(response, true);
+    return handle_response(response, true, false);
   },
 
-  report: async (pid, reason, token) => {
+  report: (item_type, id, report_type, reason, token) => {
+    if (item_type !== 'post' && item_type !== 'comment')
+      throw Error('bad type');
     let data = new URLSearchParams();
-    data.append('user_token', token);
-    data.append('pid', pid);
+    data.append('id', id);
     data.append('reason', reason);
-    let response = await fetch(
-      API_BASE + '/api.php?action=report' + token_param(token),
+    data.append('type', report_type);
+    return fetch(
+      THUHOLE_API_ROOT + 'edit/report/' + item_type + '?' + token_param(token),
       {
         method: 'POST',
         headers: {
@@ -92,22 +130,33 @@ export const API = {
         },
         body: data,
       },
-    );
-    return handle_response(response, true);
+    )
+      .then(get_json)
+      .then((json) => {
+        if (json.code !== 0) throw new Error(json.msg);
+
+        return json;
+      });
   },
 
   get_list: async (page, token) => {
     let response = await fetch(
-      API_BASE + '/api.php?action=getlist' + '&p=' + page + token_param(token),
+      THUHOLE_API_ROOT +
+        'contents/post/list' +
+        '?page=' +
+        page +
+        token_param(token),
     );
     return handle_response(response);
   },
 
-  get_search: async (page, keyword, token) => {
+  get_search: async (page, keyword, token, is_attention = false) => {
+    console.log(is_attention === true ? '/attentions' : '');
     let response = await fetch(
-      API_BASE +
-        '/api.php?action=search' +
-        '&pagesize=' +
+      THUHOLE_API_ROOT +
+        'contents/search' +
+        (is_attention === true ? '/attentions' : '') +
+        '?pagesize=' +
         SEARCH_PAGESIZE +
         '&page=' +
         page +
@@ -118,16 +167,12 @@ export const API = {
     return handle_response(response);
   },
 
-  get_single: async (pid, token) => {
+  get_attention: async (page, token) => {
     let response = await fetch(
-      API_BASE + '/api.php?action=getone' + '&pid=' + pid + token_param(token),
-    );
-    return handle_response(response);
-  },
-
-  get_attention: async (token) => {
-    let response = await fetch(
-      API_BASE + '/api.php?action=getattention' + token_param(token),
+      THUHOLE_API_ROOT +
+        'contents/post/attentions?page=' +
+        page +
+        token_param(token),
     );
     return handle_response(response);
   },

@@ -59,11 +59,17 @@
 .icon-upload:before {
   content: "\e9c3";
 }
+.icon-image:before {
+  content: "\e90d";
+}
 .icon-flag:before {
   content: "\e9cc";
 }
 .icon-attention:before {
   content: "\e9d3";
+}
+.icon-fire:before {
+  content: "\e9a9";
 }
 .icon-star:before {
   content: "\e9d7";
@@ -94,6 +100,10 @@
 }
 .icon-order-rev:before {
   content: "\ea46";
+  font-size: 1.2em;
+}
+.icon-order-rev-down:before {
+  content: "\ea47";
   font-size: 1.2em;
 }
 .icon-github:before {

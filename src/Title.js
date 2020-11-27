@@ -19,6 +19,7 @@ class ControlBar extends PureComponent {
     this.on_keypress_bound = this.on_keypress.bind(this);
     this.do_refresh_bound = this.do_refresh.bind(this);
     this.do_attention_bound = this.do_attention.bind(this);
+    this.do_hot_posts_bound = this.do_hot_posts.bind(this);
   }
 
   componentDidMount() {
@@ -67,7 +68,7 @@ class ControlBar extends PureComponent {
         return;
       }
 
-      const mode = this.state.search_text.startsWith('#')
+      const mode = /#[0-9]+/.test(this.state.search_text)
         ? 'single'
         : this.props.mode !== 'attention'
         ? 'search'
@@ -92,6 +93,14 @@ class ControlBar extends PureComponent {
     this.set_mode('attention', null);
   }
 
+  do_hot_posts() {
+    window.scrollTo(0, 0);
+    this.setState({
+      search_text: '热榜',
+    });
+    this.set_mode('search', '热榜');
+  }
+
   render() {
     return (
       <TokenCtx.Consumer>
@@ -113,6 +122,13 @@ class ControlBar extends PureComponent {
                 <span className="control-btn-label">关注</span>
               </a>
             )}
+            <a
+              className="no-underline control-btn"
+              onClick={this.do_hot_posts_bound}
+            >
+              <span className="icon icon-fire" />
+              <span className="control-btn-label">热榜</span>
+            </a>
             <input
               className="control-search"
               value={this.state.search_text}

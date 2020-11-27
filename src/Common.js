@@ -160,12 +160,21 @@ export class HighlightedMarkdown extends Component {
         },
         processNode(node, children, index) {
           const originalText = node.data;
-          const splitted = split_text(originalText, [
+          let hl_rules = [
             ['url_pid', URL_PID_RE],
             ['url', URL_RE],
             ['pid', PID_RE],
             ['nickname', NICKNAME_RE],
-          ]);
+          ];
+          if (props.search_param) {
+            hl_rules.push([
+              'search',
+              !!props.search_param.match(/\/.+\//)
+                ? build_highlight_re(props.search_param, ' ', 'gi', true) // Use regex
+                : build_highlight_re(props.search_param, ' ', 'gi'), // Don't use regex
+            ]);
+          }
+          const splitted = split_text(originalText, hl_rules);
 
           return (
             <React.Fragment key={index}>
@@ -329,7 +338,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   pwa_prompt_event = e;
 });
 
-export function PromotionBar(props) {
+export function PromotionBar() {
   let is_ios = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
   let is_installed =
     window.matchMedia('(display-mode: standalone)').matches ||
@@ -363,6 +372,36 @@ export function PromotionBar(props) {
         更好用
       </div>
     ) : null;
+}
+
+export function BrowserWarningBar() {
+  let cr_version = /Chrome\/(\d+)/.exec(navigator.userAgent);
+  cr_version = cr_version ? cr_version[1] : 0;
+  if (/MicroMessenger\/|QQ\//.test(navigator.userAgent))
+    return (
+      <div className="box box-tip box-warning">
+        <b>您正在使用 QQ/微信 内嵌浏览器</b>
+        <br />
+        建议使用系统浏览器打开，否则可能出现兼容问题
+      </div>
+    );
+  if (/Edge\/1/.test(navigator.userAgent))
+    return (
+      <div className="box box-tip box-warning">
+        <b>您正在使用旧版 Microsoft Edge</b>
+        <br />
+        建议使用新版 Edge，否则可能出现兼容问题
+      </div>
+    );
+  else if (cr_version > 1 && cr_version < 57)
+    return (
+      <div className="box box-tip box-warning">
+        <b>您正在使用古老的 Chrome {cr_version}</b>
+        <br />
+        建议使用新版浏览器，否则可能出现兼容问题
+      </div>
+    );
+  return null;
 }
 
 export class ClickHandler extends PureComponent {

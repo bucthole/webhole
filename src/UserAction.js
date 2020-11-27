@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import {
-  API_BASE,
   SafeTextarea,
   PromotionBar,
   HighlightedMarkdown,
+  BrowserWarningBar,
 } from './Common';
 import { MessageViewer } from './Message';
 import { LoginPopup } from './infrastructure/widgets';
@@ -17,6 +17,7 @@ import {
   // THUHOLE_API_ROOT,
   // API,
   get_json,
+  THUHOLE_API_ROOT,
   token_param,
 } from './flows_api';
 
@@ -224,6 +225,7 @@ export function InfoSidebar(props) {
   return (
     <div>
       <PromotionBar />
+      <BrowserWarningBar />
       <LoginForm show_sidebar={props.show_sidebar} />
       <div className="box list-menu">
         <a
@@ -661,27 +663,25 @@ export class PostForm extends Component {
 
   do_post(text, img) {
     let data = new URLSearchParams();
+    let path;
     if (this.props.action === 'docomment') {
       data.append('pid', this.props.pid);
+      path = 'send/comment?';
+    } else {
+      path = 'send/post?';
     }
     data.append('text', this.state.text);
     data.append('type', img ? 'image' : 'text');
     data.append('user_token', this.props.token);
     if (img) data.append('data', img);
 
-    fetch(
-      API_BASE +
-        '/api.php?action=' +
-        this.props.action +
-        token_param(this.props.token),
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: data,
+    fetch(THUHOLE_API_ROOT + path + token_param(this.props.token), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-    )
+      body: data,
+    })
       .then(get_json)
       .then((json) => {
         if (json.code !== 0) {
@@ -866,7 +866,7 @@ export class PostForm extends Component {
           <label>
             {/*<a>上传图片</a>*/}
             <span className={'post-upload'}>
-              <span className="icon icon-upload" />
+              <span className="icon icon-image" />
               &nbsp;插入图片
             </span>
             <input
