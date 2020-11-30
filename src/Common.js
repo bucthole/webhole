@@ -1,6 +1,5 @@
 import React, { Component, PureComponent } from 'react';
 import { format_time, Time, TitleLine } from './infrastructure/widgets';
-import { THUHOLE_API_ROOT } from './flows_api';
 
 import HtmlToReact from 'html-to-react';
 
@@ -16,8 +15,6 @@ import {
 import renderMd from './Markdown';
 
 export { format_time, Time, TitleLine };
-
-export const API_BASE = THUHOLE_API_ROOT + 'services/thuhole';
 
 // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
 function escape_regex(string) {
