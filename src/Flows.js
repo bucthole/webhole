@@ -1020,6 +1020,7 @@ class FlowItemRow extends PureComponent {
       }
 
     let showing_replies;
+    let shown_results = 0;
     if (
       this.props.search_param &&
       this.props.search_param !== '' + this.state.info.pid &&
@@ -1027,7 +1028,6 @@ class FlowItemRow extends PureComponent {
     ) {
       // filter replies based on search param
       let search_terms = this.props.search_param.split(' ');
-      let shown_results = 0;
       showing_replies = this.state.replies
         .map((reply) => {
           if (shown_results >= PREVIEW_REPLY_COUNT) return null;
@@ -1131,7 +1131,7 @@ class FlowItemRow extends PureComponent {
           {showing_replies}
           {this.state.replies.length > PREVIEW_REPLY_COUNT && (
             <div className="box box-tip">
-              还有 {this.state.replies.length - PREVIEW_REPLY_COUNT} 条
+              还有 {this.state.replies.length - shown_results} 条
             </div>
           )}
         </div>
@@ -1238,7 +1238,7 @@ class FlowItemQuote extends PureComponent {
             });
           })
           .catch((err) => {
-            if (('' + err).indexOf('找不到该树洞') !== -1)
+            if (('' + err).indexOf('找不到这条树洞') !== -1)
               this.setState({
                 loading_status: 'empty',
               });
