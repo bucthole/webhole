@@ -253,6 +253,7 @@ class Reply extends PureComponent {
 
 function ReportWidget(props) {
   let [fold_reason, set_fold_reason] = useState('');
+  let [tag_text, set_tag_text] = useState('others');
 
   function report(report_type) {
     const item_type = props.is_reply ? 'comment' : 'post';
@@ -270,38 +271,44 @@ function ReportWidget(props) {
     let item_type_str = { post: '树洞', comment: '评论' }[item_type];
 
     let reason;
-    if (
-      report_type === 'fold' ||
-      (report_type === 'set_tag' && fold_reason !== 'others')
-    ) {
-      reason = fold_reason;
-      if (reason === 'select') return;
-      if (
-        !window.confirm(
-          `确认因为 ${reason} 举报折叠 ${item_type_str} #${id} 吗？`,
+    switch (report_type) {
+      case 'fold':
+        reason = fold_reason;
+        if (reason === 'select') return;
+        if (
+          !window.confirm(
+            `确认因为 ${reason} 举报折叠 ${item_type_str} #${id} 吗？`,
+          )
         )
-      )
-        return;
-    } else if (report_type === 'report') {
-      reason = window.prompt(
-        `举报删除` + item_type_str + ' #' + id + ' 的理由：',
-      );
-      if (!reason) return;
-    } else {
-      reason = window.prompt(
-        `${report_type_str}` + item_type_str + ' #' + id + ' 的理由：',
-      );
-      if (!reason) return;
-      if (
-        !window.confirm(
-          `确认因为 ${reason} 的理由 ${report_type_str} ${item_type_str} #${id} 吗？`,
+          return;
+        break;
+      case 'set_tag':
+        reason = tag_text;
+        if (reason === 'select') return;
+        if (reason === 'others') {
+          reason = window.prompt(item_type_str + ' #' + id + ' 的tag：');
+          if (!reason) return;
+        }
+        if (
+          !window.confirm(`确认设置${item_type_str} #${id}的tag=${reason}吗？`)
         )
-      )
-        return;
+          return;
+        break;
+      case 'report':
+      default:
+        reason = window.prompt(
+          `${report_type_str}` + item_type_str + ' #' + id + ' 的理由：',
+        );
+        if (!reason) return;
+        if (
+          !window.confirm(
+            `确认因为 ${reason} 的理由 ${report_type_str} ${item_type_str} #${id} 吗？`,
+          )
+        )
+          return;
+        break;
     }
-    console.log(
-      `item_type ${item_type}, id ${id}, report_type ${report_type}, reason ${reason}`,
-    );
+
     let token = localStorage['TOKEN'];
     API.report(item_type, id, report_type, reason, token)
       .then((json) => {
@@ -387,8 +394,8 @@ function ReportWidget(props) {
         <p>
           <button onClick={() => report('set_tag')}>打tag</button>
           <select
-            value={fold_reason}
-            onChange={(e) => set_fold_reason(e.target.value)}
+            value={tag_text}
+            onChange={(e) => set_tag_text(e.target.value)}
           >
             <option value="select">选择理由……</option>
             {fold_tags.map(
