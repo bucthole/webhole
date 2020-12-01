@@ -1134,7 +1134,7 @@ class FlowItemRow extends PureComponent {
             </div>
           )}
           {showing_replies}
-          {this.state.replies.length > PREVIEW_REPLY_COUNT && (
+          {this.state.replies.length > shown_results && (
             <div className="box box-tip">
               还有 {this.state.replies.length - shown_results} 条
             </div>
