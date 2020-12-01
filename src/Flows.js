@@ -1057,7 +1057,11 @@ class FlowItemRow extends PureComponent {
         })
         .filter((x) => x !== null);
     } // show all replies
-    else
+    else {
+      shown_results =
+        this.state.replies.length > PREVIEW_REPLY_COUNT
+          ? PREVIEW_REPLY_COUNT
+          : this.state.replies.length;
       showing_replies = this.state.replies
         .slice(0, PREVIEW_REPLY_COUNT)
         .map((reply) => (
@@ -1072,6 +1076,7 @@ class FlowItemRow extends PureComponent {
             set_variant={(v) => {}}
           />
         ));
+    }
 
     let res = (
       <div
