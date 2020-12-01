@@ -17,34 +17,21 @@ import renderMd from './Markdown';
 export { format_time, Time, TitleLine };
 
 // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
-function escape_regex(string) {
+export function escape_regex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-export function build_highlight_re(
-  txt,
-  split = ' ',
-  option = 'g',
-  isRegex = false,
-) {
-  if (isRegex) {
-    try {
-      return new RegExp('(' + txt.slice(1, -1) + ')', option);
-    } catch (e) {
-      return /^$/g;
-    }
-  } else {
-    return txt
-      ? new RegExp(
-          `(${txt
-            .split(split)
-            .filter((x) => !!x)
-            .map(escape_regex)
-            .join('|')})`,
-          option,
-        )
-      : /^$/g;
-  }
+export function build_highlight_re(txt, split = ' ', option = 'gi') {
+  return txt
+    ? new RegExp(
+        `(${txt
+          .split(split)
+          .filter((x) => !!x)
+          .map(escape_regex)
+          .join('|')})`,
+        option,
+      )
+    : /^$/g;
 }
 
 export function ColoredSpan(props) {
@@ -166,9 +153,7 @@ export class HighlightedMarkdown extends Component {
           if (props.search_param) {
             hl_rules.push([
               'search',
-              !!props.search_param.match(/\/.+\//)
-                ? build_highlight_re(props.search_param, ' ', 'gi', true) // Use regex
-                : build_highlight_re(props.search_param, ' ', 'gi'), // Don't use regex
+              build_highlight_re(props.search_param, ' ', 'gi'),
             ]);
           }
           const splitted = split_text(originalText, hl_rules);

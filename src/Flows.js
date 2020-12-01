@@ -22,13 +22,12 @@ import {
 } from './text_splitter';
 import {
   format_time,
-  build_highlight_re,
   Time,
   TitleLine,
-  HighlightedText,
   ClickHandler,
   ColoredSpan,
   HighlightedMarkdown,
+  escape_regex,
 } from './Common';
 import './Flows.css';
 import LazyLoad, { forceCheck } from './react-lazyload/src';
@@ -174,8 +173,16 @@ export function load_single_meta(show_sidebar, token) {
   };
 }
 
-function search_hit(txt, terms) {
-  return terms.filter((t) => t).some((term) => txt.indexOf(term) !== -1);
+function search_hit(txt, search_param) {
+  new RegExp(
+    `(${search_param
+      .split(' ')
+      .filter((x) => !!x)
+      .map(escape_regex)
+      .join('|')})`,
+    'gi',
+  ).test(txt);
+  // return terms.filter((t) => t).some((term) => txt.indexOf(term) !== -1);
 }
 
 class Reply extends PureComponent {
@@ -1032,12 +1039,19 @@ class FlowItemRow extends PureComponent {
       this.props.search_param !== '热榜'
     ) {
       // filter replies based on search param
-      let search_terms = this.props.search_param.split(' ');
+      let search_reg = new RegExp(
+        `(${this.props.search_param
+          .split(' ')
+          .filter((x) => !!x)
+          .map(escape_regex)
+          .join('|')})`,
+        'gi',
+      );
       showing_replies = this.state.replies
         .map((reply) => {
           if (shown_results >= PREVIEW_REPLY_COUNT) return null;
           if (
-            search_hit(reply.text, search_terms) ||
+            search_reg.test(reply.text) ||
             (reply.deleted && this.props.search_param === 'deleted')
           ) {
             shown_results++;
