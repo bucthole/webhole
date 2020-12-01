@@ -17,6 +17,10 @@ function DeprecatedAlert(props) {
   return <div id="global-hint-container" style={{ display: 'none' }} />;
 }
 
+function needShowSuicidePrompt(text) {
+  return text && text.indexOf('自杀') !== -1;
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -32,6 +36,7 @@ class App extends Component {
       search_text: null,
       flow_render_key: +new Date(),
       token: localStorage['TOKEN'] || null,
+      override_suicide: false,
     };
     this.show_sidebar_bound = this.show_sidebar.bind(this);
     this.set_mode_bound = this.set_mode.bind(this);
@@ -148,22 +153,62 @@ class App extends Component {
                   </div>
                 </div>
               )}
+              {needShowSuicidePrompt(this.state.search_text) &&
+                !this.state.override_suicide && (
+                  <div className="flow-item-row">
+                    <div className="flow-item box box-tip">
+                      <p style={{ textAlign: 'left' }}>需要帮助？</p>
+                      <p style={{ textAlign: 'left' }}>
+                        北京24小时心理援助热线：
+                        <a href="tel:01082951332">010-8295-1332</a>
+                      </p>
+                      <p style={{ textAlign: 'left' }}>
+                        希望24小时热线：
+                        <a href="tel:4001619995">400-161-9995</a>
+                      </p>
+                      <hr />
+                      <p>
+                        <button
+                          onClick={() => {
+                            window.location.href =
+                              'https://www.zhihu.com/question/25082178/answer/106073121';
+                          }}
+                        >
+                          了解更多
+                        </button>
+                        &nbsp; &nbsp; &nbsp;
+                        <button
+                          onClick={() => {
+                            this.setState({
+                              override_suicide: true,
+                            });
+                          }}
+                        >
+                          展示结果
+                        </button>
+                      </p>
+                    </div>
+                  </div>
+                )}
               {this.inthu_flag || token.value ? (
-                <SwitchTransition mode="out-in">
-                  <CSSTransition
-                    key={this.state.flow_render_key}
-                    timeout={100}
-                    classNames="flows-anim"
-                  >
-                    <Flow
-                      key={this.state.flow_render_key}
-                      show_sidebar={this.show_sidebar_bound}
-                      mode={this.state.mode}
-                      search_text={this.state.search_text}
-                      token={token.value}
-                    />
-                  </CSSTransition>
-                </SwitchTransition>
+                (this.state.override_suicide ||
+                  !needShowSuicidePrompt(this.state.search_text)) && (
+                    <SwitchTransition mode="out-in">
+                      <CSSTransition
+                        key={this.state.flow_render_key}
+                        timeout={100}
+                        classNames="flows-anim"
+                      >
+                        <Flow
+                          key={this.state.flow_render_key}
+                          show_sidebar={this.show_sidebar_bound}
+                          mode={this.state.mode}
+                          search_text={this.state.search_text}
+                          token={token.value}
+                        />
+                      </CSSTransition>
+                    </SwitchTransition>
+                )
               ) : (
                 <TitleLine text="请登录后查看内容" />
               )}
