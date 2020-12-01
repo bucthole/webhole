@@ -704,7 +704,12 @@ class FlowSidebar extends PureComponent {
                       }}
                     >
                       <span className="icon icon-flag" />
-                      <label>举报</label>
+                      <label>
+                        {this.state.info.permissions.includes('delete') &&
+                        !this.state.info.permissions.includes('delete_ban')
+                          ? '撤回'
+                          : '举报'}
+                      </label>
                     </span>
                   ) : (
                     <span
