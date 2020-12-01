@@ -49,6 +49,7 @@ const QUOTE_BLACKLIST = [];
 let fold_tags = [];
 
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
+let not_show_deleted = false;
 
 const DZ_NAME = '洞主';
 
@@ -191,6 +192,14 @@ class Reply extends PureComponent {
   }
 
   render() {
+    if (
+      this.props.info.deleted &&
+      not_show_deleted &&
+      this.props.search_param !== 'deleted'
+    ) {
+      return <></>;
+    }
+
     const replyContent = this.props.info.text;
     const splitIdx = replyContent.indexOf(']');
     let props = this.props;
@@ -1009,6 +1018,10 @@ class FlowItemRow extends PureComponent {
   }
 
   render() {
+    if (this.state.info.deleted && not_show_deleted) {
+      return <></>;
+    }
+
     let show_pid = load_single_meta(this.props.show_sidebar, this.props.token, [
       this.state.info.pid,
     ]);
@@ -1557,7 +1570,7 @@ export class Flow extends PureComponent {
   }
 
   render() {
-    const should_deletion_detect = localStorage['DELETION_DETECT'] === 'on';
+    not_show_deleted = localStorage['NOT_SHOW_DELETED'] === 'on';
     let show_pid = load_single_meta(this.props.show_sidebar, this.props.token);
     return (
       <div className="flow-container">
@@ -1585,7 +1598,6 @@ export class Flow extends PureComponent {
           mode={this.state.mode}
           search_param={this.state.search_param || null}
           show_sidebar={this.props.show_sidebar}
-          deletion_detect={should_deletion_detect}
         />
         {this.state.loading_status === 'failed' && (
           <div className="aux-margin">
