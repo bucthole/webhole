@@ -1018,7 +1018,11 @@ class FlowItemRow extends PureComponent {
   }
 
   render() {
-    if (this.state.info.deleted && not_show_deleted) {
+    if (
+      this.state.info.deleted &&
+      not_show_deleted &&
+      this.props.search_param !== 'deleted'
+    ) {
       return <></>;
     }
 
