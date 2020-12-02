@@ -1425,12 +1425,17 @@ export class Flow extends PureComponent {
                   let versions_local = process.env.REACT_APP_BUILD_INFO.substring(
                     1,
                   ).split('.');
-                  if (
-                    versions_remote[0] - versions_local[0] > 0 ||
-                    versions_remote[1] - versions_local[1] > 0 ||
-                    versions_remote[2] - versions_local[2] > 0
-                  ) {
-                    DoUpdate();
+                  if (versions_remote.length >= 3) {
+                    if (
+                      versions_remote[0] > versions_local[0] ||
+                      (versions_remote[1] - versions_local[1] > 0 &&
+                        versions_remote[0] === versions_local[0]) ||
+                      (versions_remote[0] === versions_local[0] &&
+                        versions_remote[1] === versions_local[1] &&
+                        versions_remote[2] - versions_local[2] > 0)
+                    ) {
+                      DoUpdate();
+                    }
                   }
                 }
               }
