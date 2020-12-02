@@ -7,16 +7,22 @@
 git clone https://github.com/thuhole/webhole
 cd webhole
 git submodule update --init --recursive
-find . -type f -exec sed -i 's|T大树洞|你的树洞名字|g' {} +
-find . -type f -exec sed -i 's|6Leq0a0ZAAAAAHEStocsqtJfKEs9APB0LdgzTNfZ|你的reCAPTCHA v3前端Key|g' {} +
-find . -type f -exec sed -i 's|6LdPSa4ZAAAAAIeoB22GChKqrF1H0R_BaEGGz7Hf|你的reCAPTCHA v2前端Key|g' {} +
-find . -type f -exec sed -i 's|api.thuhole.com|你的API地址|g' {} +
-find . -type f -exec sed -i 's|thuhole.com|你的Website地址|g' {} +
-find . -type f -exec sed -i 's|thuhole|你的网站代码|g' {} +
-npm run build
+find . -type f -not -path '*/.*' -exec sed -i 's|T大树洞|你的树洞名字|g' {} +
+find . -type f -not -path '*/.*' -exec sed -i 's|6Leq0a0ZAAAAAHEStocsqtJfKEs9APB0LdgzTNfZ|你的reCAPTCHA v3前端Key|g' {} +
+find . -type f -not -path '*/.*' -exec sed -i 's|6LdPSa4ZAAAAAIeoB22GChKqrF1H0R_BaEGGz7Hf|你的reCAPTCHA v2前端Key|g' {} +
+find . -type f -not -path '*/.*' -exec sed -i 's|api.thuhole.com|你的API地址|g' {} +
+find . -type f -not -path '*/.*' -exec sed -i 's|thuhole.com|你的Website地址|g' {} +
+find . -type f -not -path '*/.*' -exec sed -i 's|thuhole|你的网站代码|g' {} +
+VERSION_NUMBER="v$(grep -oP '"version": "\K[^"]+' package.json | head -n1)"
+REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 ```
 
 后端安装方式请见 [thuhole/thuhole-go-backend](https://github.com/thuhole/thuhole-go-backend )。
+
+## CDN说明
+
+若要使用优秀的免费jsdelivr CDN加速主页.css/.js静态内容，
+请参见Travis部署脚本[./travis_deploy.sh](./travis_deploy.sh)。
 
 ## 浏览器兼容
 
@@ -46,7 +52,7 @@ npm run build
 
 不方便在 GitHub 上说明的问题可以邮件 thuhole at protonmail dot com。邮件内容可能会被公开。
 
-对 T大树洞 后端服务、客户端、账号、树洞内容的反馈请联系邮件 thuhole at protonmail dot com。
+对 T大树洞 后端服务、账号、树洞内容的反馈请联系邮件 thuhole at protonmail dot com。
 
 ## branch说明：
 - master branch: 主分支
