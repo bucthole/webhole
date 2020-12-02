@@ -1060,7 +1060,8 @@ class FlowItemRow extends PureComponent {
     if (
       this.props.search_param &&
       this.props.search_param !== '' + this.state.info.pid &&
-      this.props.search_param !== '热榜'
+      this.props.search_param !== '热榜' &&
+      this.props.search_param.charAt(0) !== '#'
     ) {
       // filter replies based on search param
       let search_reg = new RegExp(
