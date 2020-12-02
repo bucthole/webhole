@@ -4,14 +4,19 @@
 
 ## 安装方式
 ```bash
-sed -i 's|T大树洞|你的树洞名字|g' ./*
-sed -i 's|6Leq0a0ZAAAAAHEStocsqtJfKEs9APB0LdgzTNfZ|你的reCAPTCHA v3前端Key|g' ./*
-sed -i 's|6LdPSa4ZAAAAAIeoB22GChKqrF1H0R_BaEGGz7Hf|你的reCAPTCHA v2前端Key|g' ./*
-sed -i 's|api.thuhole.com|你的API地址|g' ./*
-sed -i 's|thuhole.com|你的Website地址|g' ./*
-sed -i 's|thuhole|你的网站代码|g' ./*
+git clone https://github.com/thuhole/webhole
+cd webhole
+git submodule update --init --recursive
+find . -type f -exec sed -i 's|T大树洞|你的树洞名字|g' {} +
+find . -type f -exec sed -i 's|6Leq0a0ZAAAAAHEStocsqtJfKEs9APB0LdgzTNfZ|你的reCAPTCHA v3前端Key|g' {} +
+find . -type f -exec sed -i 's|6LdPSa4ZAAAAAIeoB22GChKqrF1H0R_BaEGGz7Hf|你的reCAPTCHA v2前端Key|g' {} +
+find . -type f -exec sed -i 's|api.thuhole.com|你的API地址|g' {} +
+find . -type f -exec sed -i 's|thuhole.com|你的Website地址|g' {} +
+find . -type f -exec sed -i 's|thuhole|你的网站代码|g' {} +
 npm run build
 ```
+
+后端安装方式请见 [thuhole/thuhole-go-backend](https://github.com/thuhole/thuhole-go-backend )。
 
 ## 浏览器兼容
 
