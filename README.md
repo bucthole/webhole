@@ -7,12 +7,11 @@
 git clone https://github.com/thuhole/webhole
 cd webhole
 git submodule update --init --recursive
-find . -type f -not -path '*/.*' -exec sed -i 's|T大树洞|你的树洞名字|g' {} +
-find . -type f -not -path '*/.*' -exec sed -i 's|6Leq0a0ZAAAAAHEStocsqtJfKEs9APB0LdgzTNfZ|你的reCAPTCHA v3前端Key|g' {} +
-find . -type f -not -path '*/.*' -exec sed -i 's|6LdPSa4ZAAAAAIeoB22GChKqrF1H0R_BaEGGz7Hf|你的reCAPTCHA v2前端Key|g' {} +
-find . -type f -not -path '*/.*' -exec sed -i 's|api.thuhole.com|你的API地址|g' {} +
-find . -type f -not -path '*/.*' -exec sed -i 's|thuhole.com|你的Website地址|g' {} +
-find . -type f -not -path '*/.*' -exec sed -i 's|thuhole|你的网站代码|g' {} +
+
+# Edit environment configs
+vim .env
+
+# Build
 VERSION_NUMBER="v$(grep -oP '"version": "\K[^"]+' package.json | head -n1)"
 REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 ```
@@ -50,9 +49,9 @@ REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 
 欢迎提出功能和 UI 建议，但可能不会被采纳。根据 GPL，你有权自行实现你的想法。
 
-不方便在 GitHub 上说明的问题可以邮件 thuhole at protonmail dot com。邮件内容可能会被公开。
+不方便在 GitHub 上说明的问题可以邮件 contact@thuhole.com。邮件内容可能会被公开。
 
-对 T大树洞 后端服务、账号、树洞内容的反馈请联系邮件 thuhole at protonmail dot com。
+对 T大树洞 后端服务、账号、树洞内容的反馈请联系邮件 contact@thuhole.com。
 
 ## branch说明：
 - master branch: 主分支

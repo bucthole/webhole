@@ -206,7 +206,7 @@ export const TokenCtx = React.createContext({
 //         )
 //     }
 // }
-export function DoUpdate() {
+export function DoUpdate(clear_cache = true) {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
       for (let registration of registrations) {
@@ -215,10 +215,10 @@ export function DoUpdate() {
       }
     });
   }
-  cache().clear();
+  if (clear_cache) cache().clear();
   setTimeout(() => {
     window.location.reload(true);
-  }, 200);
+  }, 1000);
 }
 
 export function InfoSidebar(props) {
@@ -237,7 +237,7 @@ export function InfoSidebar(props) {
           <label>设置</label>
         </a>
         &nbsp;&nbsp;
-        <a href="https://thuhole.com/policy.html" target="_blank">
+        <a href={process.env.REACT_APP_RULES_URL} target="_blank">
           <span className="icon icon-textfile" />
           <label>树洞规范</label>
         </a>
@@ -258,7 +258,7 @@ export function InfoSidebar(props) {
         </p>
       </div>
       <div className="box help-desc-box">
-        <p>联系我们：thuhole at protonmail dot com</p>
+        <p>联系我们：{process.env.REACT_APP_CONTACT_EMAIL}</p>
       </div>
       <div className="box help-desc-box">
         <p>
@@ -453,7 +453,7 @@ export class LoginForm extends Component {
                       </p>
                       <p>
                         <small>
-                          T大树洞
+                          {process.env.REACT_APP_TITLE}
                           面向T大学生，通过T大邮箱验证您的身份并提供服务。
                         </small>
                       </p>
@@ -950,7 +950,7 @@ export class PostForm extends Component {
           <p>
             <small>
               发帖前请阅读并同意
-              <a href="https://thuhole.com/policy.html" target="_blank">
+              <a href={process.env.REACT_APP_RULES_URL} target="_blank">
                 树洞规范
               </a>
             </small>

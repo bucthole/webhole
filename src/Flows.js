@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import copy from 'copy-to-clipboard';
-// import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom';
 const { detect } = require('detect-browser');
 const browser = detect();
 import ImageSlides from 'react-imageslides';
@@ -35,7 +35,7 @@ import LazyLoad, { forceCheck } from './react-lazyload/src';
 import { TokenCtx, ReplyForm, PostForm, DoUpdate } from './UserAction';
 
 import { API } from './flows_api';
-const ADMIN_COMMANDS = ['reports', 'messages'];
+const ADMIN_COMMANDS = ['reports', 'msgs', 'dels'];
 import { cache } from './cache';
 
 // const localStorage['img_base_url'] = 'https://thimg.yecdn.com/';
@@ -195,7 +195,7 @@ class Reply extends PureComponent {
     if (
       this.props.info.deleted &&
       not_show_deleted &&
-      this.props.search_param !== 'deleted'
+      !ADMIN_COMMANDS.includes(this.props.search_param)
     ) {
       return <></>;
     }
@@ -358,7 +358,7 @@ function ReportWidget(props) {
             <button onClick={() => report('report')}>删除</button>
             <span className="report-reason">
               这条{props.is_reply ? '回复' : '树洞'}违反
-              <a href="https://thuhole.com/policy.html" target="_blank">
+              <a href={process.env.REACT_APP_RULES_URL} target="_blank">
                 社区规范
               </a>
               ，应被禁止
@@ -1021,7 +1021,7 @@ class FlowItemRow extends PureComponent {
     if (
       this.state.info.deleted &&
       not_show_deleted &&
-      this.props.search_param !== 'deleted'
+      !ADMIN_COMMANDS.includes(this.props.search_param)
     ) {
       return <></>;
     }
@@ -1077,7 +1077,7 @@ class FlowItemRow extends PureComponent {
           if (shown_results >= PREVIEW_REPLY_COUNT) return null;
           if (
             search_reg.test(reply.text) ||
-            (reply.deleted && this.props.search_param === 'deleted')
+            (reply.deleted && this.props.search_param === 'dels')
           ) {
             shown_results++;
             return (
@@ -1380,6 +1380,7 @@ export class Flow extends PureComponent {
         data: [],
       },
       announcement: '',
+      has_update: false,
       loading_status: 'done',
       error_msg: null,
     };
@@ -1404,6 +1405,7 @@ export class Flow extends PureComponent {
         API.get_list(page, this.props.token)
           .then((json) => {
             let announcement = this.state.announcement;
+            let has_update = this.state.has_update;
             if (page === 1 && json.data.length) {
               // update latest_post_id
               let max_id = -1;
@@ -1435,7 +1437,11 @@ export class Flow extends PureComponent {
                         versions_remote[1] === versions_local[1] &&
                         versions_remote[2] - versions_local[2] > 0)
                     ) {
-                      DoUpdate();
+                      has_update = true;
+                      DoUpdate(
+                        versions_remote[0] > versions_local[0] ||
+                          versions_remote[1] > versions_local[1],
+                      );
                     }
                   }
                 }
@@ -1456,6 +1462,7 @@ export class Flow extends PureComponent {
                 ),
               },
               announcement: announcement,
+              has_update: has_update,
               mode: finished ? 'list_finished' : 'list',
               loading_status: 'done',
             }));
@@ -1602,13 +1609,23 @@ export class Flow extends PureComponent {
               </a>
             </div>
           )}
-        <FlowChunk
-          title={this.state.chunks.title}
-          list={this.state.chunks.data}
-          mode={this.state.mode}
-          search_param={this.state.search_param || null}
-          show_sidebar={this.props.show_sidebar}
-        />
+
+        {this.state.has_update ? (
+          <div className="box flow-item box-warning">
+            <p>检测到更新，正在更新树洞...</p>
+            <p>
+              <a onClick={DoUpdate}>[强制更新]</a>
+            </p>
+          </div>
+        ) : (
+          <FlowChunk
+            title={this.state.chunks.title}
+            list={this.state.chunks.data}
+            mode={this.state.mode}
+            search_param={this.state.search_param || null}
+            show_sidebar={this.props.show_sidebar}
+          />
+        )}
         {this.state.loading_status === 'failed' && (
           <div className="aux-margin">
             <div className="box box-tip">

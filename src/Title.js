@@ -142,7 +142,7 @@ class ControlBar extends PureComponent {
               className="no-underline control-btn"
               onClick={() => {
                 this.props.show_sidebar(
-                  'T大树洞',
+                  process.env.REACT_APP_TITLE,
                   <InfoSidebar show_sidebar={this.props.show_sidebar} />,
                 );
               }}
@@ -191,12 +191,12 @@ export function Title(props) {
             <span
               onClick={() =>
                 props.show_sidebar(
-                  'T大树洞',
+                  process.env.REACT_APP_TITLE,
                   <InfoSidebar show_sidebar={props.show_sidebar} />,
                 )
               }
             >
-              T大树洞
+              {process.env.REACT_APP_TITLE}
             </span>
           </p>
         </div>

@@ -145,7 +145,7 @@ class App extends Component {
                         {(do_popup) => (
                           <a onClick={do_popup}>
                             <span className="icon icon-login" />
-                            &nbsp;登录到 T大树洞
+                            &nbsp;登录到 {process.env.REACT_APP_TITLE}
                           </a>
                         )}
                       </LoginPopup>
