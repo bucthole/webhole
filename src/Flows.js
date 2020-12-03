@@ -35,7 +35,17 @@ import LazyLoad, { forceCheck } from './react-lazyload/src';
 import { TokenCtx, ReplyForm, PostForm, DoUpdate } from './UserAction';
 
 import { API } from './flows_api';
-const ADMIN_COMMANDS = ['reports', 'msgs', 'dels'];
+const ADMIN_COMMANDS = [
+  'logs',
+  'rep_dels',
+  'rep_folds',
+  'log_tags',
+  'log_dels',
+  'rep_recalls',
+  'log_unbans',
+  'msgs',
+  'dels',
+];
 import { cache } from './cache';
 
 // const localStorage['img_base_url'] = 'https://thimg.yecdn.com/';
@@ -931,6 +941,7 @@ class FlowItemRow extends PureComponent {
     this.needFold =
       fold_tags.indexOf(props.info.tag) > -1 &&
       (props.search_param === '热榜' || !props.search_param) &&
+      !ADMIN_COMMANDS.includes(props.search_param) &&
       window.config.fold &&
       !props.info.attention;
     this.state = {
@@ -1058,6 +1069,7 @@ class FlowItemRow extends PureComponent {
     let showing_replies;
     let shown_results = 0;
     if (
+      !this.props.is_quote &&
       this.props.search_param &&
       this.props.search_param !== '' + this.state.info.pid &&
       this.props.search_param !== '热榜' &&
@@ -1250,6 +1262,7 @@ class FlowItemRow extends PureComponent {
           pid={quote_id}
           show_sidebar={this.props.show_sidebar}
           token={this.props.token}
+          search_param={this.props.search_param}
         />
       </div>
     ) : (
@@ -1331,6 +1344,7 @@ class FlowItemQuote extends PureComponent {
           replies={this.state.info.data}
           color_picker={this.color_picker}
           show_sidebar={this.props.show_sidebar}
+          search_param={this.props.search_param}
           token={this.props.token}
           is_quote={true}
         />
