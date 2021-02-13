@@ -1,5 +1,5 @@
 import React, { Component, PureComponent } from 'react';
-import { format_time, Time, TitleLine } from './infrastructure/widgets';
+import { format_time, Time, TitleLine } from './old_infrastructure/widgets';
 
 import HtmlToReact from 'html-to-react';
 

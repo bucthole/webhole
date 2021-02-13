@@ -6,8 +6,8 @@ import { SwitchTransition, CSSTransition } from 'react-transition-group';
 import { PressureHelper } from './PressureHelper';
 import { TokenCtx } from './UserAction';
 import { load_config, bgimg_style } from './Config';
-import { listen_darkmode } from './infrastructure/functions';
-import { LoginPopup, TitleLine } from './infrastructure/widgets';
+import { listen_darkmode } from './old_infrastructure/functions';
+import { LoginPopup, TitleLine } from './old_infrastructure/widgets';
 import { cache } from './cache';
 import './App.css';
 

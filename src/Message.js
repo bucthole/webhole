@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { THUHOLE_API_ROOT, get_json, API_VERSION_PARAM } from './flows_api';
+import { API_ROOT, get_json, API_VERSION_PARAM } from './flows_api';
 import { Time } from './Common';
 
 export class MessageViewer extends PureComponent {
@@ -22,12 +22,11 @@ export class MessageViewer extends PureComponent {
         loading_status: 'loading',
       },
       () => {
-        fetch(
-          THUHOLE_API_ROOT +
-            'contents/system_msg?user_token=' +
-            encodeURIComponent(this.props.token) +
-            API_VERSION_PARAM(),
-        )
+        fetch(API_ROOT + 'contents/system_msg?' + API_VERSION_PARAM(), {
+          headers: {
+            TOKEN: this.props.token,
+          },
+        })
           .then(get_json)
           .then((json) => {
             if (json.error) throw new Error(json.error);

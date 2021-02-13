@@ -6,7 +6,7 @@ import {
   BrowserWarningBar,
 } from './Common';
 import { MessageViewer } from './Message';
-import { LoginPopup } from './infrastructure/widgets';
+import { LoginPopup } from './old_infrastructure/widgets';
 import { ColorPicker } from './color_picker';
 import { ConfigUI } from './Config';
 import fixOrientation from 'fix-orientation';
@@ -17,9 +17,8 @@ import {
   // THUHOLE_API_ROOT,
   // API,
   get_json,
-  THUHOLE_API_ROOT,
-  token_param,
-} from './flows_api';
+  API_ROOT, API_VERSION_PARAM
+} from "./flows_api";
 
 import './UserAction.css';
 
@@ -672,13 +671,13 @@ export class PostForm extends Component {
     }
     data.append('text', this.state.text);
     data.append('type', img ? 'image' : 'text');
-    data.append('user_token', this.props.token);
     if (img) data.append('data', img);
 
-    fetch(THUHOLE_API_ROOT + path + token_param(this.props.token), {
+    fetch(API_ROOT + path + API_VERSION_PARAM(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        TOKEN: this.props.token,
       },
       body: data,
     })
