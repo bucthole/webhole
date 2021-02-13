@@ -210,12 +210,10 @@ class Reply extends PureComponent {
       return <></>;
     }
 
-    const replyContent = this.props.info.text;
-    const splitIdx = replyContent.indexOf(']');
     let props = this.props;
 
-    const author = replyContent.substr(0, splitIdx + 1),
-      replyText = replyContent.substr(splitIdx + 2);
+    const author = '[' + this.props.info.name + ']',
+      replyText = this.props.info.text;
     return (
       <div
         className={'flow-reply box'}
