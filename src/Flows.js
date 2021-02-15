@@ -18,7 +18,7 @@ import {
   NICKNAME_RE,
   PID_RE,
   URL_RE,
-  URL_PID_RE,
+  // URL_PID_RE,
 } from './text_splitter';
 import {
   format_time,
@@ -48,15 +48,14 @@ const ADMIN_COMMANDS = [
 ];
 import { cache } from './cache';
 
-// const localStorage['img_base_url'] = 'https://thimg.yecdn.com/';
-// const localStorage['img_base_url_bak'] = 'https://img2.thuhole.com/';
+// const process.env.REACT_APP_IMG_BASE_URL = 'https://thimg.yecdn.com/';
+// const process.env.REACT_APP_IMG_BASE_BAK_URL = 'https://img2.thuhole.com/';
 // const AUDIO_BASE=THUHOLE_API_ROOT+'services/thuhole/audios/';
 
 const CLICKABLE_TAGS = { a: true, audio: true };
 const PREVIEW_REPLY_COUNT = 10;
 // const QUOTE_BLACKLIST=['23333','233333','66666','666666','10086','10000','100000','99999','999999','55555','555555'];
 const QUOTE_BLACKLIST = [];
-let fold_tags = [];
 
 window.LATEST_POST_ID = parseInt(localStorage['_LATEST_POST_ID'], 10) || 0;
 let not_show_deleted = false;
@@ -66,13 +65,13 @@ const DZ_NAME = '洞主';
 const ImageComponent = (props) => (
   <p className="img">
     <img
-      src={localStorage['img_base_url'] + props.path}
+      src={process.env.REACT_APP_IMG_BASE_URL + props.path}
       onError={(e) => {
-        if (e.target.src === localStorage['img_base_url'] + props.path) {
-          e.target.src = localStorage['img_base_url_bak'] + props.path;
+        if (e.target.src === process.env.REACT_APP_IMG_BASE_URL + props.path) {
+          e.target.src = process.env.REACT_APP_IMG_BASE_BAK_URL + props.path;
         }
       }}
-      alt={localStorage['img_base_url'] + props.path}
+      alt={process.env.REACT_APP_IMG_BASE_URL + props.path}
     />
   </p>
 );
@@ -115,7 +114,7 @@ class ImageViewer extends PureComponent {
             ReactDOM.createPortal(
               <div>
                 <ImageSlides
-                  images={[localStorage['img_base_url'] + this.props.url]}
+                  images={[process.env.REACT_APP_IMG_BASE_URL + this.props.url]}
                   isOpen
                   onClose={() => {
                     this.setState({ visible: false });
@@ -130,7 +129,7 @@ class ImageViewer extends PureComponent {
     return (
       <a
         className="no-underline"
-        href={localStorage['img_base_url'] + this.props.url}
+        href={process.env.REACT_APP_IMG_BASE_URL + this.props.url}
         target="_blank"
       >
         <ImageComponent path={this.props.url} />
@@ -348,14 +347,11 @@ function ReportWidget(props) {
               onChange={(e) => set_fold_reason(e.target.value)}
             >
               <option value="select">选择理由……</option>
-              {fold_tags.map(
-                (tag, i) =>
-                  !['折叠', '举报较多'].includes(tag) && (
-                    <option key={i} value={tag}>
-                      #{tag}
-                    </option>
-                  ),
-              )}
+              {process.env.REACT_APP_REPORTABLE_TAGS.map((tag, i) => (
+                <option key={i} value={tag}>
+                  #{tag}
+                </option>
+              ))}
             </select>
           </p>
         )}
@@ -415,14 +411,11 @@ function ReportWidget(props) {
             onChange={(e) => set_tag_text(e.target.value)}
           >
             <option value="select">选择理由……</option>
-            {fold_tags.map(
-              (tag, i) =>
-                !['举报较多'].includes(tag) && (
-                  <option key={i} value={tag}>
-                    #{tag}
-                  </option>
-                ),
-            )}
+            {process.env.REACT_APP_REPORTABLE_TAGS.map((tag, i) => (
+              <option key={i} value={tag}>
+                #{tag}
+              </option>
+            ))}
             <option value="">无tag</option>
             <option value="others">其他</option>
           </select>
@@ -495,7 +488,8 @@ class FlowItem extends PureComponent {
               </a>
             </code>
             &nbsp;
-            {props.info.tag !== null && props.info.tag !== '折叠' && (
+            {/*{props.info.tag !== null && props.info.tag !== '折叠' && (*/}
+            {props.info.tag !== null && (
               <span className="box-header-tag">{props.info.tag}</span>
             )}
             <Time stamp={props.info.timestamp} short={!props.in_sidebar} />
@@ -937,7 +931,7 @@ class FlowItemRow extends PureComponent {
   constructor(props) {
     super(props);
     this.needFold =
-      fold_tags.indexOf(props.info.tag) > -1 &&
+      process.env.REACT_APP_FOLD_TAGS.indexOf(props.info.tag) > -1 &&
       (props.search_param === '热榜' || !props.search_param) &&
       !ADMIN_COMMANDS.includes(props.search_param) &&
       window.config.fold &&
@@ -1040,7 +1034,7 @@ class FlowItemRow extends PureComponent {
     ]);
 
     let hl_rules = [
-      ['url_pid', URL_PID_RE],
+      // ['url_pid', URL_PID_RE],
       ['url', URL_RE],
       ['pid', PID_RE],
       ['nickname', NICKNAME_RE],
@@ -1235,12 +1229,15 @@ class FlowItemRow extends PureComponent {
                 {/*)}*/}
                 <code className="box-id">#{this.props.info.pid}</code>
                 &nbsp;
-                {this.props.info.tag !== null &&
-                  this.props.info.tag !== '折叠' && (
-                    <span className="box-header-tag">
-                      {this.props.info.tag}
-                    </span>
-                  )}
+                {/*{this.props.info.tag !== null &&*/}
+                {/*this.props.info.tag !== '折叠' && (*/}
+                {/*  <span className="box-header-tag">*/}
+                {/*      {this.props.info.tag}*/}
+                {/*    </span>*/}
+                {/*)}*/}
+                {this.props.info.tag !== null && (
+                  <span className="box-header-tag">{this.props.info.tag}</span>
+                )}
                 <Time stamp={this.props.info.timestamp} short={true} />
                 <span className="box-header-badge">
                   {this.needFold ? '已隐藏' : '已屏蔽'}
@@ -1426,9 +1423,6 @@ export class Flow extends PureComponent {
               });
               localStorage['_LATEST_POST_ID'] = '' + max_id;
               if (json.config) {
-                localStorage['img_base_url'] = json.config.img_base_url;
-                localStorage['img_base_url_bak'] = json.config.img_base_url_bak;
-                fold_tags = json.config.fold_tags;
                 if (json.config.announcement) {
                   announcement = json.config.announcement;
                 }
@@ -1662,7 +1656,7 @@ export class Flow extends PureComponent {
                 &nbsp;Loading...
               </span>
             ) : (
-              '© thuhole'
+              '© ' + process.env.REACT_APP_COPYRIGHT_STRING
             )
           }
         />

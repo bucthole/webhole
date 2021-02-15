@@ -17,8 +17,9 @@ import {
   // THUHOLE_API_ROOT,
   // API,
   get_json,
-  API_ROOT, API_VERSION_PARAM
-} from "./flows_api";
+  API_ROOT,
+  API_VERSION_PARAM,
+} from './flows_api';
 
 import './UserAction.css';
 
@@ -241,10 +242,7 @@ export function InfoSidebar(props) {
           <label>树洞规范</label>
         </a>
         &nbsp;&nbsp;
-        <a
-          href="https://github.com/thuhole/thuhole-go-backend/issues"
-          target="_blank"
-        >
+        <a href={process.env.REACT_APP_GITHUB_ISSUES_URL} target="_blank">
           <span className="icon icon-github" />
           <label>意见反馈</label>
         </a>
@@ -261,7 +259,8 @@ export function InfoSidebar(props) {
       </div>
       <div className="box help-desc-box">
         <p>
-          T大树洞 网页版 by @thuhole， 基于&nbsp;
+          {process.env.REACT_APP_TITLE} 网页版 by @
+          {process.env.REACT_APP_GITHUB_USER}， 基于&nbsp;
           <a
             href="https://www.gnu.org/licenses/gpl-3.0.zh-cn.html"
             target="_blank"
@@ -269,13 +268,13 @@ export function InfoSidebar(props) {
             GPLv3
           </a>
           &nbsp;协议在{' '}
-          <a href="https://github.com/thuhole/webhole" target="_blank">
+          <a href={process.env.REACT_APP_GITHUB_WEB_URL} target="_blank">
             GitHub
           </a>{' '}
           开源
         </p>
         <p>
-          T大树洞 网页版的诞生离不开&nbsp;
+          {process.env.REACT_APP_TITLE} 网页版的诞生离不开&nbsp;
           <a
             href="https://github.com/pkuhelper-web/webhole"
             target="_blank"
@@ -385,7 +384,9 @@ export class LoginForm extends Component {
   copy_token(token) {
     if (copy(token))
       alert(
-        '复制成功！\n请一定不要泄露给其他人，或在thuhole.com以外的其他网站中输入token，否则可能会导致信息泄漏哦',
+        '复制成功！\n请一定不要泄露给其他人，或在' +
+          process.env.REACT_APP_WEBSITE_URL +
+          '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
       );
   }
 
