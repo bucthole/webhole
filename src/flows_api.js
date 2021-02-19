@@ -42,6 +42,7 @@ const handle_response = async (response, notify = false, add_v = true) => {
 
 export const API = {
   load_replies: (pid, token, color_picker) => {
+    console.log('load_replies')
     pid = parseInt(pid);
     return fetch(
       API_ROOT + 'contents/post/detail?pid=' + pid + API_VERSION_PARAM(),
@@ -56,7 +57,6 @@ export const API = {
         if (json.code !== 0) {
           throw new Error(json.msg);
         }
-
         cache().put(pid, json.post.updated_at, json);
 
         // also change load_replies_with_cache!
@@ -72,6 +72,8 @@ export const API = {
   },
 
   load_replies_with_cache: (pid, token, color_picker, cache_version) => {
+    console.log('load_replies_with_cache')
+
     pid = parseInt(pid);
     return cache()
       .get(pid, cache_version)
