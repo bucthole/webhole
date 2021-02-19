@@ -30,182 +30,9 @@ const MAX_IMG_FILESIZE = 450000 * BASE64_RATE;
 
 export const TokenCtx = React.createContext({
   value: null,
-  set_value: () => {},
+  set_value: () => { },
 });
 
-// class LifeInfoBox extends Component {
-//     constructor(props) {
-//         super(props);
-//         if(!window._life_info_cache)
-//             window._life_info_cache={};
-//         this.CACHE_TIMEOUT_S=15;
-//         this.state={
-//             today_info: this.cache_get('today_info'),
-//             card_balance: this.cache_get('card_balance'),
-//             net_balance: this.cache_get('net_balance'),
-//             mail_count: this.cache_get('mail_count'),
-//         };
-//         this.INTERNAL_NETWORK_FAILURE='_network_failure';
-//         this.API_NAME={
-//             today_info: 'hole/today_info',
-//             card_balance: 'isop/card_balance',
-//             net_balance: 'isop/net_balance',
-//             mail_count: 'isop/mail_count',
-//         };
-//     }
-//
-//     cache_get(key) {
-//         let cache_item=window._life_info_cache[key];
-//         if(!cache_item || (+new Date())-cache_item[0]>1000*this.CACHE_TIMEOUT_S)
-//             return null;
-//         else
-//             return cache_item[1];
-//     }
-//     cache_set(key,value) {
-//         if(!window._life_info_cache[key] || window._life_info_cache[key][1]!==value)
-//             window._life_info_cache[key]=[+new Date(),value];
-//     }
-//
-//     load(state_key) {
-//         this.setState({
-//             [state_key]: null,
-//         },()=>{
-//             fetch(
-//                 PKUHELPER_ROOT+'api_xmcp/'+this.API_NAME[state_key]
-//                 +'?user_token='+encodeURIComponent(this.props.token)
-//                 +API_VERSION_PARAM()
-//             )
-//                 .then(get_json)
-//                 .then((json)=>{
-//                     //console.log(json);
-//                     this.setState({
-//                         [state_key]: json,
-//                     });
-//                 })
-//                 .catch((e)=>{
-//                     this.setState({
-//                         [state_key]: {
-//                             errMsg: '网络错误 '+e,
-//                             errCode: this.INTERNAL_NETWORK_FAILURE,
-//                             success: false,
-//                         }
-//                     });
-//                 })
-//         });
-//     }
-//
-//     componentDidMount() {
-//         ['today_info','card_balance','net_balance','mail_count'].forEach((k)=>{
-//             if(!this.state[k])
-//                 this.load(k);
-//         });
-//     }
-//
-//     reload_all() {
-//         ['today_info','card_balance','net_balance','mail_count'].forEach((k)=>{
-//             this.load(k);
-//         });
-//     }
-//
-//     render_line(state_key,title,value_fn,action,url_fn,do_login) {
-//         let s=this.state[state_key];
-//         if(!s)
-//             return (
-//                 <tr>
-//                     <td>{title}</td>
-//                     <td>加载中……</td>
-//                     <td />
-//                 </tr>
-//             );
-//         else if(!s.success) {
-//             let type='加载失败';
-//             if(s.errCode===this.INTERNAL_NETWORK_FAILURE)
-//                 type='网络错误';
-//             else if(['E01','E02','E03'].indexOf(s.errCode)!==-1)
-//                 type='授权失效';
-//
-//             let details=JSON.stringify(s);
-//             if(s.errMsg)
-//                 details=s.errMsg;
-//             else if(s.error)
-//                 details=s.error;
-//
-//             return (
-//                 <tr>
-//                     <td>{title}</td>
-//                     <td className="life-info-error">
-//                         <a onClick={()=>alert(details)}>{type}</a>
-//                     </td>
-//                     <td>
-//                         {type==='授权失效' ?
-//                             <a onClick={do_login}>
-//                                 <span className="icon icon-forward" />&nbsp;重新登录
-//                             </a> :
-//                             <a onClick={()=>this.load(state_key)}>
-//                                 <span className="icon icon-forward" />&nbsp;重试
-//                             </a>
-//                         }
-//                     </td>
-//                 </tr>
-//             )
-//         }
-//         else {
-//             this.cache_set(state_key,s);
-//
-//             return (
-//                 <tr>
-//                     <td>{title}</td>
-//                     <td>{value_fn(s)}</td>
-//                     <td>
-//                         <a href={url_fn(s)} target="_blank">
-//                             <span className="icon icon-forward" />&nbsp;{action}
-//                         </a>
-//                     </td>
-//                 </tr>
-//             );
-//         }
-//     }
-//
-//     render() {
-//         return (
-//             <LoginPopup token_callback={(t)=>{
-//                 this.props.set_token(t);
-//                 this.reload_all();
-//             }}>{(do_login)=>(
-//                 <div className="box">
-//                     <table className="life-info-table">
-//                         <tbody>
-//                             {this.render_line(
-//                                 'today_info',
-//                                 '今日',(s)=>s.info,
-//                                 '校历',(s)=>s.schedule_url,
-//                                 do_login,
-//                             )}
-//                             {this.render_line(
-//                                 'card_balance',
-//                                 '校园卡',(s)=>`余额￥${s.balance.toFixed(2)}`,
-//                                 '充值',()=>'https://virtualprod.alipay.com/educate/educatePcRecharge.htm?schoolCode=PKU&schoolName=',
-//                                 do_login,
-//                             )}
-//                             {this.render_line(
-//                                 'net_balance',
-//                                 '网费',(s)=>`余额￥${s.balance.toFixed(2)}`,
-//                                 '充值',()=>'https://its.pku.edu.cn/epay.jsp',
-//                                 do_login,
-//                             )}
-//                             {this.render_line(
-//                                 'mail_count',
-//                                 '邮件',(s)=>`未读 ${s.count} 封`,
-//                                 '查看',()=>'https://mail.pku.edu.cn/',
-//                                 do_login,
-//                             )}
-//                         </tbody>
-//                     </table>
-//                 </div>
-//             )}</LoginPopup>
-//         )
-//     }
-// }
 export function DoUpdate(clear_cache = true) {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -315,78 +142,13 @@ export function InfoSidebar(props) {
   );
 }
 
-// class ResetUsertokenWidget extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       loading_status: 'done',
-//     };
-//   }
-//
-//   do_reset() {
-//     if (
-//       window.confirm(
-//         '您正在重置 UserToken！\n您的账号将会在【所有设备】上注销，您需要手动重新登录！',
-//       )
-//     ) {
-//       let uid = window.prompt(
-//         '您正在重置 UserToken！\n请输入您的学号以确认身份：',
-//       );
-//       if (uid)
-//         this.setState(
-//           {
-//             loading_status: 'loading',
-//           },
-//           () => {
-//             fetch(THUHOLE_API_ROOT + 'api_xmcp/hole/reset_usertoken', {
-//               method: 'post',
-//               headers: {
-//                 'Content-Type': 'application/json',
-//               },
-//               body: JSON.stringify({
-//                 user_token: this.props.token,
-//                 uid: uid,
-//               }),
-//             })
-//               .then(get_json)
-//               .then((json) => {
-//                 if (json.error) throw new Error(json.error);
-//                 else alert('重置成功！您需要在所有设备上重新登录。');
-//
-//                 this.setState({
-//                   loading_status: 'done',
-//                 });
-//               })
-//               .catch((e) => {
-//                 alert('重置失败：' + e);
-//                 this.setState({
-//                   loading_status: 'done',
-//                 });
-//               });
-//           },
-//         );
-//     }
-//   }
-//
-//   render() {
-//     if (this.state.loading_status === 'done')
-//       return <a onClick={this.do_reset.bind(this)}>重置</a>;
-//     else if (this.state.loading_status === 'loading')
-//       return (
-//         <a>
-//           <span className="icon icon-loading" />
-//         </a>
-//       );
-//   }
-// }
-
 export class LoginForm extends Component {
   copy_token(token) {
     if (copy(token))
       alert(
         '复制成功！\n请一定不要泄露给其他人，或在' +
-          process.env.REACT_APP_WEBSITE_URL +
-          '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
+        process.env.REACT_APP_WEBSITE_URL +
+        '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
       );
   }
 
@@ -395,9 +157,6 @@ export class LoginForm extends Component {
       <TokenCtx.Consumer>
         {(token) => (
           <div>
-            {/*{!!token.value &&*/}
-            {/*    <LifeInfoBox token={token.value} set_token={token.set_value} />*/}
-            {/*}*/}
             <div className="login-form box">
               {token.value ? (
                 <div>
@@ -413,10 +172,6 @@ export class LoginForm extends Component {
                     </button>
                     <br />
                   </p>
-                  {/*<p>*/}
-                  {/*根据计算中心要求，访问授权三个月内有效，过期需重新登录。*/}
-                  {/*T大树洞将会单向加密(i.e. 哈希散列)您的邮箱后再存入数据库，因此您的发帖具有较强的匿名性。具体可见我们的<a href="https://github.com/thuhole/thuhole-go-backend/blob/76f56e6b75257b59e552b6bdba77e114151fcad1/src/db.go#L184">后端开源代码</a>。*/}
-                  {/*</p>*/}
                   <p>
                     <a
                       onClick={() => {
@@ -438,7 +193,6 @@ export class LoginForm extends Component {
                     <br />
                     复制 User Token
                     可以在新设备登录，切勿告知他人。若怀疑被盗号请重新邮箱验证码登录以重置Token。
-                    {/*，若怀疑被盗号请尽快 <ResetUsertokenWidget token={token.value} />*/}
                   </p>
                 </div>
               ) : (
@@ -447,20 +201,18 @@ export class LoginForm extends Component {
                     <div>
                       <p>
                         <button type="button" onClick={do_popup}>
-                          <span className="icon icon-login" />
-                          &nbsp;登录
+                          <span className="icon icon-login" />&nbsp;登录
                         </button>
                       </p>
                       <p>
                         <small>
-                          {process.env.REACT_APP_TITLE}
-                          面向T大学生，通过T大邮箱验证您的身份并提供服务。
+                          {process.env.REACT_APP_TITLE}面向T大学生，通过T大邮箱验证您的身份并提供服务。
                         </small>
                       </p>
                     </div>
                   )}
                 </LoginPopup>
-              )}
+                )}
             </div>
           </div>
         )}
@@ -469,149 +221,39 @@ export class LoginForm extends Component {
   }
 }
 
-// export class ReplyForm extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       text: '',
-//       loading_status: 'done',
-//       preview: false,
-//     };
-//     this.on_change_bound = this.on_change.bind(this);
-//     this.area_ref = this.props.area_ref || React.createRef();
-//     this.global_keypress_handler_bound = this.global_keypress_handler.bind(
-//       this,
-//     );
-//     this.color_picker = new ColorPicker();
-//   }
-//
-//   global_keypress_handler(e) {
-//     if (
-//       e.code === 'Enter' &&
-//       !e.ctrlKey &&
-//       !e.altKey &&
-//       ['input', 'textarea'].indexOf(e.target.tagName.toLowerCase()) === -1
-//     ) {
-//       if (this.area_ref.current) {
-//         e.preventDefault();
-//         this.area_ref.current.focus();
-//       }
-//     }
-//   }
-//   componentDidMount() {
-//     document.addEventListener('keypress', this.global_keypress_handler_bound);
-//   }
-//   componentWillUnmount() {
-//     document.removeEventListener(
-//       'keypress',
-//       this.global_keypress_handler_bound,
-//     );
-//   }
-//
-//   on_change(value) {
-//     this.setState({
-//       text: value,
-//     });
-//   }
-//
-//   on_submit(event) {
-//     if (event) event.preventDefault();
-//     if (this.state.loading_status === 'loading') return;
-//     this.setState({
-//       loading_status: 'loading',
-//     });
-//
-//     let data = new URLSearchParams();
-//     data.append('pid', this.props.pid);
-//     data.append('text', this.state.text);
-//     data.append('user_token', this.props.token);
-//     fetch(
-//       API_BASE + '/api.php?action=docomment' + token_param(this.props.token),
-//       {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/x-www-form-urlencoded',
-//         },
-//         body: data,
-//       },
-//     )
-//       .then(get_json)
-//       .then((json) => {
-//         if (json.code !== 0) {
-//           if (json.msg) alert(json.msg);
-//           throw new Error(JSON.stringify(json));
-//         }
-//
-//         this.setState({
-//           loading_status: 'done',
-//           text: '',
-//           preview: false,
-//         });
-//         this.area_ref.current.clear();
-//         this.props.on_complete();
-//       })
-//       .catch((e) => {
-//         console.error(e);
-//         alert('回复失败');
-//         this.setState({
-//           loading_status: 'done',
-//         });
-//       });
-//   }
-//
-//   toggle_preview() {
-//     this.setState({
-//       preview: !this.state.preview,
-//     });
-//   }
-//
-//   render() {
-//     return (
-//       <form
-//         onSubmit={this.on_submit.bind(this)}
-//         className={'reply-form box' + (this.state.text ? ' reply-sticky' : '')}
-//       >
-//         {this.state.preview ? (
-//           <div className="reply-preview">
-//             <HighlightedMarkdown
-//               text={this.state.text}
-//               color_picker={this.color_picker}
-//               show_pid={() => {}}
-//             />
-//           </div>
-//         ) : (
-//           <SafeTextarea
-//             ref={this.area_ref}
-//             id={this.props.pid}
-//             on_change={this.on_change_bound}
-//             on_submit={this.on_submit.bind(this)}
-//           />
-//         )}
-//         <button
-//           type="button"
-//           onClick={() => {
-//             this.toggle_preview();
-//           }}
-//         >
-//           {this.state.preview ? (
-//             <span className="icon icon-eye-blocked" />
-//           ) : (
-//             <span className="icon icon-eye" />
-//           )}
-//         </button>
-//         {this.state.loading_status === 'loading' ? (
-//           <button disabled="disabled">
-//             <span className="icon icon-loading" />
-//           </button>
-//         ) : (
-//           <button type="submit">
-//             <span className="icon icon-send" />
-//           </button>
-//         )}
-//       </form>
-//     );
-//   }
-// }
+export class VoteEditBox extends Component{
+  constructor(props){
+    super(props)
+    this.onChangeCheckAndSend = this.checkAndSend.bind(this)
+  }
+  checkAndSend(order){
+    return (value)=>{
+      const {sendVoteData} = this.props
+      sendVoteData({[order]:value})
+    }
+  }
+  render(){
+    let {num} = this.props
+    const inputPile = [];
+    for (let i = 0; i < num; i+=1) {
+      inputPile.push(
+        <input 
+          key={i} 
+          maxLength="20"
+          style={{padding:'0 2px',margin:'2px 2px'}} 
+          onChange={(event)=>{this.onChangeCheckAndSend(i+1)(event.target.value)}} 
+          placeholder={i+1}/>          
+      );
+    }
+    return (
+      <div>
+        <hr/>
+        <p>设置2~4个选项，每项不超过20字符</p>
+        {inputPile}
+      </div>
+    )
+  }
+}
 
 export class PostForm extends Component {
   constructor(props) {
@@ -621,6 +263,9 @@ export class PostForm extends Component {
       loading_status: 'done',
       img_tip: null,
       preview: false,
+      vote:false,
+      voteOptionNum: 0,
+      voteData: {1:null,2:null,3:null,4:null},
     };
     this.img_ref = React.createRef();
     this.area_ref = this.props.area_ref || React.createRef();
@@ -673,7 +318,19 @@ export class PostForm extends Component {
     data.append('text', this.state.text);
     data.append('type', img ? 'image' : 'text');
     if (img) data.append('data', img);
-
+    // 投票
+    if (this.state.vote) {
+      let voteObj = this.state.voteData
+      Object.keys(voteObj).forEach(item=>{
+        if(!voteObj[item])  delete voteObj[item]
+      })
+      let voteArray = Object.values(voteObj)
+      voteArray.map((char)=>{
+        data.append('vote_options[]', char);
+      })
+    }
+    
+    // fetch发送
     fetch(API_ROOT + path + API_VERSION_PARAM(), {
       method: 'POST',
       headers: {
@@ -688,7 +345,6 @@ export class PostForm extends Component {
           if (json.msg) alert(json.msg);
           throw new Error(JSON.stringify(json));
         }
-
         this.setState({
           loading_status: 'done',
           text: '',
@@ -800,8 +456,7 @@ export class PostForm extends Component {
             .then((d) => {
               this.setState({
                 img_tip:
-                  `（${d.compressed ? '压缩到' : '尺寸'} ${d.width}*${
-                    d.height
+                  `（${d.compressed ? '压缩到' : '尺寸'} ${d.width}*${d.height
                   } / ` +
                   `质量 ${Math.floor(d.quality * 100)}% / ${Math.floor(
                     d.img.length / BASE64_RATE / 1000,
@@ -852,7 +507,20 @@ export class PostForm extends Component {
     });
   }
 
+  addVote() {
+    let { voteOptionNum } = this.state
+    if (voteOptionNum >= 4) {
+      alert('最大支持4个选项')
+    } else if (voteOptionNum == 0) {
+      voteOptionNum = 2
+    } else {
+      voteOptionNum++
+    }
+    this.setState({ voteOptionNum })
+  }
+
   render() {
+    const { vote } = this.state
     let replyClassName =
       'reply-form box' + (this.state.text ? ' reply-sticky' : '');
     return (
@@ -877,7 +545,27 @@ export class PostForm extends Component {
               onChange={this.on_img_change_bound}
             />
           </label>
-
+          {/* 发起投票，不可在评论区发送投票*/}
+          {this.props.action==='dopost' ? (
+            !vote ?(
+              <button
+                type="button"
+                onClick={() => { this.setState({vote:true,voteOptionNum:2}); }}
+              >
+                <span className="icon icon-how_to_vote" />
+                &nbsp;投票
+              </button>
+            ) : (
+              <button 
+                type="button"
+                onClick={() => { this.addVote() }}
+              >
+                <span className="icon icon-how_to_vote" />
+                &nbsp;添加
+              </button>
+            )
+          ):(<div></div>)
+          }
           {this.state.preview ? (
             <button
               type="button"
@@ -890,16 +578,14 @@ export class PostForm extends Component {
             </button>
           ) : (
             <button
-              type="button"
-              onClick={() => {
-                this.toggle_preview();
-              }}
-            >
+            type="button"
+            onClick={() => {
+              this.toggle_preview();
+            }}>
               <span className="icon icon-eye" />
-              &nbsp;预览
+            &nbsp;预览
             </button>
-          )}
-
+            )}
           {this.state.loading_status !== 'done' ? (
             <button disabled="disabled">
               <span className="icon icon-loading" />
@@ -935,7 +621,7 @@ export class PostForm extends Component {
             <HighlightedMarkdown
               text={this.state.text}
               color_picker={this.color_picker}
-              show_pid={() => {}}
+              show_pid={() => { }}
             />
           </div>
         ) : (
@@ -944,6 +630,15 @@ export class PostForm extends Component {
             id={this.props.pid}
             on_change={this.on_change_bound}
             on_submit={this.on_submit.bind(this)}
+          />
+          )}
+        {this.state.voteOptionNum !== 0 && (
+          <VoteEditBox 
+            num={this.state.voteOptionNum} 
+            sendVoteData={(voteDataObj)=>{
+              let preVoteData=this.state.voteData; 
+              Object.assign(preVoteData,voteDataObj);
+              this.setState({voteData:preVoteData});}}
           />
         )}
         {this.props.action === 'dopost' && (
