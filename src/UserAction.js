@@ -325,14 +325,9 @@ export class PostForm extends Component {
         if(!voteObj[item])  delete voteObj[item]
       })
       let voteArray = Object.values(voteObj)
-      let voteDataString = '['
       voteArray.map((char)=>{
-        voteDataString = voteDataString + '\"' + char+'\",'
+        data.append('vote_options[]', char);
       })
-      voteDataString = voteDataString.substr(0, voteDataString.length - 1);
-      voteDataString = voteDataString + ']'
-      console.log(voteDataString)
-      data.append('vote_options', voteDataString);
     }
     
     // fetch发送
