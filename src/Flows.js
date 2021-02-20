@@ -36,6 +36,7 @@ import LazyLoad, { forceCheck } from './react-lazyload/src';
 // import { AudioWidget } from './AudioWidget';
 import { TokenCtx, ReplyForm, PostForm, DoUpdate } from './UserAction';
 import { API, API_VERSION_PARAM, get_json } from './flows_api';
+import {nanoid} from 'nanoid'
 const ADMIN_COMMANDS = [
   'logs',
   'rep_dels',
@@ -504,23 +505,23 @@ class VoteShowBox extends PureComponent{
       // 结果显示组
       voteData.map((voteSingle,index)=>{
         resultPile.push(index==yourVoteIndex?(
-          <progress
-            className="votedOption"
-            key={index}
-            value={eachNums[index]}
-            max={totalCount}
-            data-label={voteSingle}
-            data-nums={eachNums[index]}
-          />
+          <div key={nanoid()} className="div-shell" style={{borderColor:"#ffe5d8"}}>
+            <div className="div-background"></div>
+            <div className="div-votedOptionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
+            <div className="div-text">
+              <p className="p-voteDataShow" style={{left:"0.5em"}}>{voteSingle}</p>
+              <p className="p-voteDataShow" style={{right:"0.5em"}}>{eachNums[index]}</p>
+            </div>
+          </div>
         ):(
-          <progress
-            className="otherOption"
-            key={index}
-            value={eachNums[index]}
-            max={totalCount}
-            data-label={voteSingle}
-            data-nums={eachNums[index]}
-        />)
+          <div key={nanoid()} className="div-shell">
+            <div className="div-background"></div>
+            <div className="div-optionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
+            <div className="div-text">
+              <p className="p-voteDataShow" style={{left:"0.5em"}}>{voteSingle}</p>
+              <p className="p-voteDataShow" style={{right:"0.5em"}}>{eachNums[index]}</p>
+            </div>
+          </div>)
         );
       })
     }else{
@@ -547,7 +548,7 @@ class VoteShowBox extends PureComponent{
     return(
       <div>
         <hr/>
-        <div style={{backgroundColor:'#f2f2f5',padding:'10px'}}>
+        <div className="voteGroupPanel">
           {alreadyVote ? (
             <div>{resultPile}</div>
           ):(
@@ -647,6 +648,7 @@ class FlowItem extends PureComponent {
             {voteOptionNum !== 0 && (
               <VoteShowBox 
                 voteOptions={props.info.vote}
+                // voteOptions={{vote_data:{第一个选项第一个选项第一个选项第一个选项:30,第二个选项第二个选项第二个选项第二个选项:20,第三个选项第三个选项第三个选项第三个选项:40,第四个选项第四个选项第四个选项第四个选项:100},voted:"第四个选项第四个选项第四个选项第四个选项"}}
                 pid={props.info.pid}
                 token={this.props.token}
               />
