@@ -418,28 +418,60 @@
 .div-text {
   position: absolute;
   left: 0px;
-  top: 0.3em;
+  top: 0px;
   background-color: 0;
   width: 100%;
-  height: 1em;
+  height: 100%;
   margin: 0px;
   padding: 0px;
   vertical-align: 0;
 }
 
 .p-voteDataShow{
-  position:absolute;
-  top:0.2em;
-  color: #000;
-  font-size: 0.8em;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 14px;
+  width: 80%;
+  padding-left: 5px;
+}
+
+.p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
 }
 
 /* 被引时的字体变小 */
 .flow-item-quote .p-voteDataShow{
-  position:absolute;
-  top:0.3em;
-  color: #000;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
   font-size: 0.7em;
+  width: 80%;
+  padding-left: 5px;
+}
+
+.flow-item-quote .p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 0.7em;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
 }
 
 .voteGroupPanel{
@@ -502,11 +534,30 @@
 }
 
 .root-dark-mode .p-voteDataShow{
-  position:absolute;
-  top:0.2em;
-  font-size: 0.8em;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 14px;
+  width: 80%;
+  padding-left: 5px;
   color: rgb(240, 240, 240);
 }
+
+.root-dark-mode .p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
+  color: rgb(240, 240, 240);
+}
+
 .root-dark-mode .voteGroupPanel{
   background-color:#ffffff0e;
   padding:10px;
@@ -514,8 +565,32 @@
 
 /* 被引时的字体变小 */
 .root-dark-mode .flow-item-quote .p-voteDataShow{
-  position:absolute;
-  top:0.3em;
-  color: rgb(240, 240, 240);
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
   font-size: 0.7em;
+  width: 80%;
+  padding-left: 5px;
+  color: rgb(240, 240, 240);
+}
+
+.root-dark-mode .flow-item-quote .p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 0.7em;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
+  color: rgb(240, 240, 240);
+}
+
+.liu_area{
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
 }

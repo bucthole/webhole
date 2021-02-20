@@ -510,7 +510,8 @@ class VoteShowBox extends PureComponent{
             <div className="div-votedOptionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
             <div className="div-text">
               <p className="p-voteDataShow" style={{left:"0.5em"}}>{voteSingle}</p>
-              <p className="p-voteDataShow" style={{right:"0.5em"}}>{eachNums[index]}</p>
+              <p className="p-voteDataShow-right" style={{right:"0.5em"}}>{eachNums[index]}</p>
+              <span className="liu_area"></span>
             </div>
           </div>
         ):(
@@ -519,7 +520,8 @@ class VoteShowBox extends PureComponent{
             <div className="div-optionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
             <div className="div-text">
               <p className="p-voteDataShow" style={{left:"0.5em"}}>{voteSingle}</p>
-              <p className="p-voteDataShow" style={{right:"0.5em"}}>{eachNums[index]}</p>
+              <p className="p-voteDataShow-right" style={{right:"0.5em"}}>{eachNums[index]}</p>
+              <span className="liu_area"></span>
             </div>
           </div>)
         );
@@ -647,8 +649,8 @@ class FlowItem extends PureComponent {
             )}
             {voteOptionNum !== 0 && (
               <VoteShowBox 
-                voteOptions={props.info.vote}
-                // voteOptions={{vote_data:{第一个选项第一个选项第一个选项第一个选项:30,第二个选项第二个选项第二个选项第二个选项:20,第三个选项第三个选项第三个选项第三个选项:40,第四个选项第四个选项第四个选项第四个选项:100},voted:"第四个选项第四个选项第四个选项第四个选项"}}
+                // voteOptions={props.info.vote}
+                voteOptions={{vote_data:{第一个选项:30,第二个选项第二个选项:20,第三个选项第三个选项第三个选项:40,第四个选项第四个选项第四个选项第四个选项:100},voted:"第四个选项第四个选项第四个选项第四个选项"}}
                 pid={props.info.pid}
                 token={this.props.token}
               />
