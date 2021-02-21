@@ -509,18 +509,18 @@ class VoteShowBox extends PureComponent{
             <div className="div-background"></div>
             <div className="div-votedOptionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
             <div className="div-text">
-              <p className="p-voteDataShow" style={{left:"0.5em"}}>{voteSingle}</p>
-              <p className="p-voteDataShow-right" style={{right:"0.5em"}}>{eachNums[index]}</p>
+              <p className="p-voteDataShow" style={{left:"0.5em",fontSize:voteSingle.length>18?("12px"):("14px")}}>{voteSingle}</p>
+              <p className="p-voteDataShow-right" style={{right:"0.5em",fontSize:eachNums[index]>999?("12px"):("14px")}}>{eachNums[index]}</p>
               <span className="liu_area"></span>
             </div>
           </div>
         ):(
           <div key={nanoid()} className="div-shell">
             <div className="div-background"></div>
-            <div className="div-optionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
+            <div className="div-optionBar" style={{width:eachNums[index]/totalCount*100 + '%',display:eachNums[index]==0?("none"):("inline")}}></div>
             <div className="div-text">
-              <p className="p-voteDataShow" style={{left:"0.5em"}}>{voteSingle}</p>
-              <p className="p-voteDataShow-right" style={{right:"0.5em"}}>{eachNums[index]}</p>
+              <p className="p-voteDataShow" style={{left:"0.5em",fontSize:voteSingle.length>18?("12px"):("14px")}}>{voteSingle}</p>
+              <p className="p-voteDataShow-right" style={{right:"0.5em",fontSize:eachNums[index]>999?("12px"):("14px")}}>{eachNums[index]}</p>
               <span className="liu_area"></span>
             </div>
           </div>)
@@ -650,7 +650,7 @@ class FlowItem extends PureComponent {
             {voteOptionNum !== 0 && (
               <VoteShowBox 
                 voteOptions={props.info.vote}
-                // voteOptions={{vote_data:{第一个选项:30,第二个选项第二个选项:20,第三个选项第三个选项第三个选项:40,第四个选项第四个选项第四个选项第四个选项:100},voted:"第四个选项第四个选项第四个选项第四个选项"}}
+                // voteOptions={{vote_data:{第一个选项:300,第二个选项第二个选项:200,第三个选项第三个选项第三个选项:400,第四个选项第四个选项第四个选项第四个选项:1000},voted:"第四个选项第四个选项第四个选项第四个选项"}}
                 pid={props.info.pid}
                 token={this.props.token}
               />
