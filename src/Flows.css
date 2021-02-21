@@ -360,6 +360,7 @@
   opacity: 0.6;
 }
 
+/* 投票相关 */
 .voteButton {
   width: 100%;
   margin: 2px 0px;
@@ -371,90 +372,225 @@
   border-radius: 3px;
   cursor: pointer;
 }
-
-/* 样式来自:https://stackoverflow.com/questions/41429906/how-to-display-data-label-inside-html5-progress-bar-cross-browser */
-/* 已选项样式 */
-progress.votedOption {
-  text-align: left;
-  margin: 2px 0;
-  height: 2em;
+.div-shell {
+  position: relative;
+  color: #000;
   width: 100%;
-  -webkit-appearance: none;
-  border: none;
+  height: 2em;
+  margin: 5px 0;
+  border:none;
+}
+.div-background {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: #fff;
+  width: 100%;
+  height: 2em;
+  border: 1px solid #dfdfdf;
+  border-radius:5px;
+}
+/*普通选项的进度条*/
+.div-optionBar {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: #d3d3d3;
+  width: 0px;
+  height: 2em;
+  border-radius:5px;
+  border: 1px solid #dfdfdf;
+}
+
+/*选中选项的进度条*/
+.div-votedOptionBar {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: #ffc7ab;
+  border: 1px solid #ffc7ab;
+  width: 0px;
+  height: 100%;
+  border-radius:5px;
+}
+
+/* 字体：左面选项右面票数 */
+.div-text {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  vertical-align: 0;
+}
+
+.p-voteDataShow{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 14px;
+  width: 80%;
+  padding-left: 5px;
+}
+
+.p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
+}
+
+/* 被引时的字体变小 */
+.flow-item-quote .p-voteDataShow{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 0.7em;
+  width: 80%;
+  padding-left: 5px;
+}
+
+.flow-item-quote .p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 0.7em;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
+}
+
+.voteGroupPanel{
+  background-color:#f2f2f5;
+  padding:10px;
+}
+
+/*Dark mode*/
+.root-dark-mode .voteButton {
+  width: 100%;
+  margin: 2px 0px;
+  background-color: #666;
+  color: rgb(223, 223, 223);
+  border-color: #666;
   border-style: solid;
   border-width: 1px;
-  border-color: #ffe5d8;
-  /* Set the progressbar to relative */
+  border-radius: 3px;
+  cursor: pointer;
+}
+.root-dark-mode .div-shell {
   position: relative;
-}
-progress.votedOption:before {
-  content: attr(data-label);
-  font-size: 0.8em;
-  top: 0.6em;
-  vertical-align: 0;
-
-  /*Position text over the progress bar */
-  position: absolute;
-  left: 10px;
-}
-progress.votedOption:after {
-  content: attr(data-nums);
-  font-size: 0.8em;
-  vertical-align: 0;
-  top: 0.6em;
-  /*Position text over the progress bar */
-  position: absolute;
-  right: 10px;
-}
-progress.votedOption::-webkit-progress-bar {
-  background-color: #ffffff3f;
-}
-progress.votedOption::-webkit-progress-value {
-  background-color: #ffc4a7;
-}
-progress.votedOption::-moz-progress-bar {
-  background-color: #ffffff00;
-}
-
-/* 其它样式 */
-progress.otherOption {
-  text-align: left;
-  margin: 2px 0;
-  height: 2em;
+  color: #000;
   width: 100%;
-  -webkit-appearance: none;
-  border: none;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #dfdfdf;
-  /* Set the progressbar to relative */
-  position: relative;
+  height: 2em;
+  margin: 5px 0;
+  border:none;
 }
-progress.otherOption:before {
-  content: attr(data-label);
-  font-size: 0.8em;
-  top: 0.6em;
-  vertical-align: 0;
+.root-dark-mode .div-background {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: #202020;
+  width: 100%;
+  height: 2em;
+  border: 1px solid #2e2e2e;
+  border-radius:5px;
+}
+/*普通选项的进度条*/
+.root-dark-mode .div-optionBar {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: #858585ea;
+  width: 0px;
+  height: 2em;
+  border-radius:5px;
+  border: 1px solid #1f1f1f;
+}
 
-  /*Position text over the progress bar */
+/*选中选项的进度条*/
+.root-dark-mode .div-votedOptionBar {
   position: absolute;
-  left: 10px;
+  left: 0px;
+  top: 0px;
+  background-color: #44a5f5e5;
+  border: 1px solid #44a5f5e5;
+  width: 0px;
+  height: 100%;
+  border-radius:5px;
 }
-progress.otherOption:after {
-  content: attr(data-nums);
-  font-size: 0.8em;
-  vertical-align: 0;
-  top: 0.6em;
-  /*Position text over the progress bar */
-  position: absolute;
-  right: 10px;
+
+.root-dark-mode .p-voteDataShow{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 14px;
+  width: 80%;
+  padding-left: 5px;
+  color: rgb(240, 240, 240);
 }
-progress.otherOption::-webkit-progress-bar {
-  background-color: #ffffff3f;
+
+.root-dark-mode .p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
+  color: rgb(240, 240, 240);
 }
-progress.otherOption::-webkit-progress-value {
-  background-color: #dfdfdf;
+
+.root-dark-mode .voteGroupPanel{
+  background-color:#ffffff0e;
+  padding:10px;
 }
-progress.otherOption::-moz-progress-bar {
-  background-color: #ffffff00;
+
+/* 被引时的字体变小 */
+.root-dark-mode .flow-item-quote .p-voteDataShow{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 0.7em;
+  width: 80%;
+  padding-left: 5px;
+  color: rgb(240, 240, 240);
+}
+
+.root-dark-mode .flow-item-quote .p-voteDataShow-right{
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 0.7em;
+  padding-left: 5px;
+  text-align: right;
+  width: 20%;
+  padding-right: 5px;
+  color: rgb(240, 240, 240);
+}
+
+.liu_area{
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
 }
