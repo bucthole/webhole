@@ -54,7 +54,7 @@ import { cache } from './cache';
 // const process.env.REACT_APP_IMG_BASE_BAK_URL = 'https://img2.thuhole.com/';
 // const AUDIO_BASE=THUHOLE_API_ROOT+'services/thuhole/audios/';
 
-const CLICKABLE_TAGS = { a: true, audio: true };
+const CLICKABLE_TAGS = { a: true, audio: true, button: true };
 const PREVIEW_REPLY_COUNT = 10;
 // const QUOTE_BLACKLIST=['23333','233333','66666','666666','10086','10000','100000','99999','999999','55555','555555'];
 const QUOTE_BLACKLIST = [];
@@ -437,6 +437,7 @@ class VoteShowBox extends PureComponent{
       totalCount:0,
       eachNums:[],
       loading:false,
+      vote_data:0,
     }
     this.sendVoteOption = this.sendVote.bind(this)
   }
@@ -486,18 +487,50 @@ class VoteShowBox extends PureComponent{
           if (json.msg) alert(json.msg);
           throw new Error(JSON.stringify(json));
         }
-        this.setState({loading:false})
-        PubSub.publish('VoteDoneFreshSideBar', null);
-        console.log("Vote Publish")
+        // 投完票后从json中获取票数
+        const { voted, vote_data } = json.vote
+        let totalCount = 0
+        let opIndex = 0
+        let yourVoteIndex = null
+        let eachNums = [];
+        if (voted !== "") {
+          for (let option in vote_data) {
+            eachNums.push(vote_data[option])
+            totalCount += vote_data[option]
+            if (voted === option) {
+              yourVoteIndex = opIndex
+            }
+            opIndex++
+          }
+          this.setState({
+            alreadyVote: true,
+            yourVoteText: voted,
+            loading:false,
+            yourVoteIndex,
+            totalCount,
+            eachNums,
+            vote_data,
+          })
+          // 通知FlowItemRow在点击后先刷新
+          // 发送pid，限制某pid更新，不会波及到其他FlowItemRow
+          PubSub.publish('VoteDoneClickFreshSideBarFirst', this.props.pid);
+        }
       })
       .catch((e) => {
         console.error(e);
         alert('投票失败');
+        this.setState({
+          alreadyVote: false,
+          loading:false,
+        })
       });
   }
   render(){
     const {alreadyVote,eachNums,yourVoteIndex,totalCount,loading} = this.state
-    const {voteOptions:{vote_data}} = this.props
+    let {vote_data} = this.state
+    if (vote_data==0) {
+      vote_data = this.props.voteOptions.vote_data
+    }
     const voteData = Object.keys(vote_data)
     const resultPile = [];
     const buttonPile = [];
@@ -650,7 +683,7 @@ class FlowItem extends PureComponent {
             {voteOptionNum !== 0 && (
               <VoteShowBox 
                 voteOptions={props.info.vote}
-                // voteOptions={{vote_data:{第一个选项:300,第二个选项第二个选项:200,第三个选项第三个选项第三个选项:400,第四个选项第四个选项第四个选项第四个选项:1000},voted:"第四个选项第四个选项第四个选项第四个选项"}}
+                // voteOptions={{vote_data:{第一个选项:300,第二个选项第二个选项:200,第三个选项第三个选项第三个选项:400,第四个选项第四个选项第四个选项:1000},voted:"第四个选项第四个选项第四个选项"}}
                 pid={props.info.pid}
                 token={this.props.token}
               />
@@ -682,13 +715,11 @@ class FlowSidebar extends PureComponent {
     this.color_picker = props.color_picker;
     this.syncState = props.sync_state || (() => {});
     this.reply_ref = React.createRef();
-    this.pubSubToken = PubSub.subscribe('VoteDoneFreshSideBar', this.hanldeFreashForVote.bind(this));
   }
-  hanldeFreashForVote(msg,data){
-    this.load_replies()
-  }
-  componentWillUnmount(){
-    PubSub.unsubscribe(this.pubSubToken);
+  componentDidMount(){
+    if (this.props.freshFirst) {
+      this.load_replies()
+    }
   }
   set_variant(cid, variant) {
     this.setState(
@@ -1080,6 +1111,7 @@ class FlowItemRow extends PureComponent {
       window.config.fold &&
       !props.info.attention;
     this.state = {
+      freshFirst:false,
       replies: props.replies || [],
       reply_status: 'done',
       reply_error: null,
@@ -1090,8 +1122,16 @@ class FlowItemRow extends PureComponent {
         ) || this.needFold,
     };
     this.color_picker = this.props.color_picker || new ColorPicker();
+    this.pubSubToken = PubSub.subscribe('VoteDoneClickFreshSideBarFirst', this.hanldeFreashForVote.bind(this));
   }
-
+  hanldeFreashForVote(msg,data){
+    if (this.props.info.pid == data) {
+      this.setState({freshFirst:true})
+    }
+  }
+  componentWillUnmount(){
+    PubSub.unsubscribe(this.pubSubToken);
+  }
   componentDidMount() {
     if (this.state.info.reply && this.state.replies.length === 0) {
       this.load_replies(null, /*update_post=*/ false);
@@ -1144,7 +1184,7 @@ class FlowItemRow extends PureComponent {
       });
   }
 
-  show_sidebar() {
+  show_sidebar(freshFirst) {
     this.props.show_sidebar(
       '树洞 #' + this.state.info.pid,
       <FlowSidebar
@@ -1155,6 +1195,7 @@ class FlowItemRow extends PureComponent {
         token={this.props.token}
         show_sidebar={this.props.show_sidebar}
         color_picker={this.color_picker}
+        freshFirst={freshFirst}
       />,
     );
   }
@@ -1265,10 +1306,17 @@ class FlowItemRow extends PureComponent {
           'flow-item-row flow-item-row-with-prompt' +
           (this.props.is_quote ? ' flow-item-row-quote' : '')
         }
-        onClick={(e) => {
-          if (!CLICKABLE_TAGS[e.target.tagName.toLowerCase()])
-            this.show_sidebar();
-        }}
+        onClick={(e) => { 
+          if (!CLICKABLE_TAGS[e.target.tagName.toLowerCase()]){
+            // 如果需要售出刷新就发送信号
+            if (this.state.freshFirst) {
+              this.show_sidebar(true);
+              this.setState({freshFirst:false})
+            }else{
+              this.show_sidebar(false);
+            }
+          }
+          }}
       >
         <FlowItem
           info={this.state.info}
