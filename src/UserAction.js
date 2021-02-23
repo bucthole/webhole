@@ -239,7 +239,7 @@ export class VoteEditBox extends Component{
       inputPile.push(
         <input 
           key={i} 
-          maxLength="20"
+          maxLength="15"
           style={{padding:'0 2px',margin:'2px 2px'}} 
           onChange={(event)=>{this.onChangeCheckAndSend(i+1)(event.target.value)}} 
           placeholder={i+1}/>          
@@ -248,7 +248,7 @@ export class VoteEditBox extends Component{
     return (
       <div>
         <hr/>
-        <p>设置2~4个选项，每项不超过20字符</p>
+        <p>设置2~4个选项，每项不超过15字符</p>
         {inputPile}
       </div>
     )
