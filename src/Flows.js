@@ -680,15 +680,15 @@ class FlowItem extends PureComponent {
             {props.info.type === 'image' && (
               <ImageViewer in_sidebar={props.in_sidebar} url={props.info.url} />
             )}
-            {voteOptionNum !== 0 && (
-              <VoteShowBox 
-                voteOptions={props.info.vote}
-                // voteOptions={{vote_data:{第一个选项:300,第二个选项第二个选项:200,第三个选项第三个选项第三个选项:400,第四个选项第四个选项第四个选项:1000},voted:"第四个选项第四个选项第四个选项"}}
-                pid={props.info.pid}
-                token={this.props.token}
-              />
-            )}
           </div>
+          {voteOptionNum !== 0 && (
+            <VoteShowBox 
+              voteOptions={props.info.vote}
+              // voteOptions={{vote_data:{第一个选项:300,第二个选项第二个选项:200,第三个选项第三个选项第三个选项:400,第四个选项第四个选项第四个选项:1000},voted:"第四个选项第四个选项第四个选项"}}
+              pid={props.info.pid}
+              token={this.props.token}
+            />
+          )}
           {!!(props.attention && props.info.variant.latest_reply) && (
             <p className="box-footer">
               最新回复{' '}
@@ -884,6 +884,7 @@ class FlowSidebar extends PureComponent {
           }}
         >
           <FlowItem
+            token = {this.props.token}
             info={this.state.info}
             in_sidebar={true}
             color_picker={this.color_picker}
