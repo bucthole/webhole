@@ -884,6 +884,7 @@ class FlowSidebar extends PureComponent {
           }}
         >
           <FlowItem
+            token = {this.props.token}
             info={this.state.info}
             in_sidebar={true}
             color_picker={this.color_picker}
