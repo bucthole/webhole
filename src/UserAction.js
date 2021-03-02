@@ -266,6 +266,7 @@ export class PostForm extends Component {
       vote:false,
       voteOptionNum: 0,
       voteData: {1:null,2:null,3:null,4:null},
+      tag:"可选标签",
     };
     this.img_ref = React.createRef();
     this.area_ref = this.props.area_ref || React.createRef();
@@ -317,6 +318,9 @@ export class PostForm extends Component {
     }
     data.append('text', this.state.text);
     data.append('type', img ? 'image' : 'text');
+    if (this.state.tag!=='可选标签') {
+      data.append('tag', this.state.tag);
+    }
     if (img) data.append('data', img);
     // 投票
     if (this.state.vote) {
@@ -523,6 +527,12 @@ export class PostForm extends Component {
     const { vote } = this.state
     let replyClassName =
       'reply-form box' + (this.state.text ? ' reply-sticky' : '');
+    var tagsArray = process.env.REACT_APP_SENDABLE_TAGS.split('\\\"');
+    let tagsArrayAfter = tagsArray.filter((tag) =>{
+      if (tag !== '[' && tag !== ']' && tag !== ',') {        
+        return tag
+      }
+    })
     return (
       <form
         onSubmit={this.on_submit.bind(this)}
@@ -564,8 +574,7 @@ export class PostForm extends Component {
                 &nbsp;添加
               </button>
             )
-          ):(<div></div>)
-          }
+          ):(<div></div>)}
           {this.state.preview ? (
             <button
               type="button"
@@ -599,6 +608,18 @@ export class PostForm extends Component {
             </button>
           )}
         </div>
+        {this.props.action==='dopost' ? (
+          <div>
+            <select className="selectCss" onChange={e=>this.setState({tag:e.target.value})}>
+              <option className="selectOption">可选标签</option>
+              {tagsArrayAfter.map((tag, i) => (
+                <option className="selectOption" key={i} value={tag}>
+                  #{tag}
+                </option>
+              ))}
+            </select>
+          </div>
+        ):(<div></div>)}
         {!!this.state.img_tip && (
           <p className="post-form-img-tip">
             <a
