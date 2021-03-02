@@ -608,18 +608,6 @@ export class PostForm extends Component {
             </button>
           )}
         </div>
-        {this.props.action==='dopost' ? (
-          <div>
-            <select className="selectCss" onChange={e=>this.setState({tag:e.target.value})}>
-              <option className="selectOption">可选标签</option>
-              {tagsArrayAfter.map((tag, i) => (
-                <option className="selectOption" key={i} value={tag}>
-                  #{tag}
-                </option>
-              ))}
-            </select>
-          </div>
-        ):(<div></div>)}
         {!!this.state.img_tip && (
           <p className="post-form-img-tip">
             <a
@@ -663,14 +651,25 @@ export class PostForm extends Component {
           />
         )}
         {this.props.action === 'dopost' && (
-          <p>
+          <div>
             <small>
               发帖前请阅读并同意
               <a href={process.env.REACT_APP_RULES_URL} target="_blank">
                 树洞规范
               </a>
+              &nbsp;
+              <span style={{float:"right"}}>
+                <select className="selectCss" onChange={e=>this.setState({tag:e.target.value})}>
+                  <option className="selectOption">可选标签</option>
+                  {tagsArrayAfter.map((tag, i) => (
+                    <option className="selectOption" key={i} value={tag}>
+                      #{tag}
+                    </option>
+                  ))}
+                </select>
+              </span>
             </small>
-          </p>
+          </div>
         )}
       </form>
     );
