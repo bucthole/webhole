@@ -110,7 +110,6 @@ input[type="file"] {
     margin-bottom: 10px;
     text-align: center;
     text-align-last: center;
-    font-size: 8px;
 }
 
 .root-dark-mode .selectCss{
@@ -120,7 +119,6 @@ input[type="file"] {
     margin-bottom: 10px;
     text-align: center;
     text-align-last: center;
-    font-size: 8px;
 }
 
 .selectOption{
