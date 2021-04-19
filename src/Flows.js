@@ -664,7 +664,7 @@ class FlowItem extends PureComponent {
           this.props.info.likenum
         }关注 ${this.props.info.reply}回复）\n` +
         `投票：\n${
-          this.props.info.vote
+          this.props.info.vote && this.props.info.vote.vote_options
             ? this.props.info.vote.vote_options.map((v) => v).join('\n')
             : ''
         }\n` +
