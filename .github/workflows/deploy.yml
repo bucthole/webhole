@@ -27,8 +27,8 @@ jobs:
             export DEPLOY_BRANCH="gh-pages"
           fi
           echo "deploy_branch=${DEPLOY_BRANCH}"  >> $GITHUB_ENV
-          #CDN_URL="https://cdn.jsdelivr.net/gh/${REPO_NAME}@${DEPLOY_BRANCH}"
-          CDN_URL="."
+          CDN_URL="https://cdn.jsdelivr.net/gh/${REPO_NAME}@${DEPLOY_BRANCH}"
+          #CDN_URL="."
           VERSION_NUMBER="v$(grep -oP '"version": "\K[^"]+' package.json | head -n1)"
           npm install
           echo "DEPLOY_BRANCH=$DEPLOY_BRANCH, VERSION_NUMBER=$VERSION_NUMBER, CDN_URL=$CDN_URL"
