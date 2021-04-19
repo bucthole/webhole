@@ -29,11 +29,11 @@ export class MessageViewer extends PureComponent {
         })
           .then(get_json)
           .then((json) => {
-            if (json.error) throw new Error(json.error);
+            if (json.code !== 0) throw new Error(json.msg);
             else
               this.setState({
                 loading_status: 'done',
-                msg: json.result,
+                msg: json.data,
               });
           })
           .catch((err) => {

@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import PubSub from 'pubsub-js'
+import PubSub from 'pubsub-js';
 import copy from 'copy-to-clipboard';
 import ReactDOM from 'react-dom';
 const { detect } = require('detect-browser');
@@ -36,7 +36,7 @@ import LazyLoad, { forceCheck } from './react-lazyload/src';
 // import { AudioWidget } from './AudioWidget';
 import { TokenCtx, ReplyForm, PostForm, DoUpdate } from './UserAction';
 import { API, API_VERSION_PARAM, get_json } from './flows_api';
-import {nanoid} from 'nanoid'
+import { nanoid } from 'nanoid';
 const ADMIN_COMMANDS = [
   'logs',
   'rep_dels',
@@ -349,11 +349,13 @@ function ReportWidget(props) {
               onChange={(e) => set_fold_reason(e.target.value)}
             >
               <option value="select">选择理由……</option>
-              {process.env.REACT_APP_REPORTABLE_TAGS.map((tag, i) => (
-                <option key={i} value={tag}>
-                  #{tag}
-                </option>
-              ))}
+              {process.env.REACT_APP_REPORTABLE_TAGS.split(',').map(
+                (tag, i) => (
+                  <option key={i} value={tag}>
+                    #{tag}
+                  </option>
+                ),
+              )}
             </select>
           </p>
         )}
@@ -413,7 +415,7 @@ function ReportWidget(props) {
             onChange={(e) => set_tag_text(e.target.value)}
           >
             <option value="select">选择理由……</option>
-            {process.env.REACT_APP_REPORTABLE_TAGS.map((tag, i) => (
+            {process.env.REACT_APP_REPORTABLE_TAGS.split(',').map((tag, i) => (
               <option key={i} value={tag}>
                 #{tag}
               </option>
@@ -427,51 +429,53 @@ function ReportWidget(props) {
   );
 }
 
-class VoteShowBox extends PureComponent{
-  constructor(props){
-    super(props)
+class VoteShowBox extends PureComponent {
+  constructor(props) {
+    super(props);
     this.state = {
-      alreadyVote:false,
-      yourVoteText:"",
-      yourVoteIndex:null,
-      totalCount:0,
-      eachNums:[],
-      loading:false,
-      vote_data:0,
-    }
-    this.sendVoteOption = this.sendVote.bind(this)
+      alreadyVote: false,
+      yourVoteText: '',
+      yourVoteIndex: null,
+      totalCount: 0,
+      eachNums: [],
+      loading: false,
+      vote_data: 0,
+    };
+    this.sendVoteOption = this.sendVote.bind(this);
   }
-  componentDidMount(){
-    const {voteOptions:{voted, vote_data}} = this.props
-    let totalCount = 0
-    let opIndex = 0
-    let yourVoteIndex = null
+  componentDidMount() {
+    const {
+      voteOptions: { voted, vote_data },
+    } = this.props;
+    let totalCount = 0;
+    let opIndex = 0;
+    let yourVoteIndex = null;
     let eachNums = [];
-    if (voted !== "") {
+    if (voted !== '') {
       for (let option in vote_data) {
-        eachNums.push(vote_data[option])
-        totalCount += vote_data[option]
-        if (voted===option) {
-          yourVoteIndex=opIndex
+        eachNums.push(vote_data[option]);
+        totalCount += vote_data[option];
+        if (voted === option) {
+          yourVoteIndex = opIndex;
         }
-        opIndex++
+        opIndex++;
       }
       this.setState({
-        alreadyVote:true,
-        yourVoteText:voted,
+        alreadyVote: true,
+        yourVoteText: voted,
         yourVoteIndex,
         totalCount,
         eachNums,
-      })
+      });
     }
   }
   sendVote(optionText) {
-    let data = new URLSearchParams()
-    let path = 'send/vote?'
-    const { pid } = this.props
-    data.append('pid', pid)
-    data.append('option', optionText)
-    this.setState({loading:true})
+    let data = new URLSearchParams();
+    let path = 'send/vote?';
+    const { pid } = this.props;
+    data.append('pid', pid);
+    data.append('option', optionText);
+    this.setState({ loading: true });
     // fetch发送
     fetch(API_ROOT + path + API_VERSION_PARAM(), {
       method: 'POST',
@@ -488,29 +492,29 @@ class VoteShowBox extends PureComponent{
           throw new Error(JSON.stringify(json));
         }
         // 投完票后从json中获取票数
-        const { voted, vote_data } = json.vote
-        let totalCount = 0
-        let opIndex = 0
-        let yourVoteIndex = null
+        const { voted, vote_data } = json.vote;
+        let totalCount = 0;
+        let opIndex = 0;
+        let yourVoteIndex = null;
         let eachNums = [];
-        if (voted !== "") {
+        if (voted !== '') {
           for (let option in vote_data) {
-            eachNums.push(vote_data[option])
-            totalCount += vote_data[option]
+            eachNums.push(vote_data[option]);
+            totalCount += vote_data[option];
             if (voted === option) {
-              yourVoteIndex = opIndex
+              yourVoteIndex = opIndex;
             }
-            opIndex++
+            opIndex++;
           }
           this.setState({
             alreadyVote: true,
             yourVoteText: voted,
-            loading:false,
+            loading: false,
             yourVoteIndex,
             totalCount,
             eachNums,
             vote_data,
-          })
+          });
           // 通知FlowItemRow在点击后先刷新
           // 发送pid，限制某pid更新，不会波及到其他FlowItemRow
           PubSub.publish('VoteDoneClickFreshSideBarFirst', this.props.pid);
@@ -521,77 +525,124 @@ class VoteShowBox extends PureComponent{
         alert('投票失败');
         this.setState({
           alreadyVote: false,
-          loading:false,
-        })
+          loading: false,
+        });
       });
   }
-  render(){
-    const {alreadyVote,eachNums,yourVoteIndex,totalCount,loading} = this.state
-    let {vote_data} = this.state
-    if (vote_data==0) {
-      vote_data = this.props.voteOptions.vote_data
+  render() {
+    const {
+      alreadyVote,
+      eachNums,
+      yourVoteIndex,
+      totalCount,
+      loading,
+    } = this.state;
+    let { vote_data } = this.state;
+    if (vote_data == 0) {
+      vote_data = this.props.voteOptions.vote_data;
     }
-    const voteData = Object.keys(vote_data)
+    const voteData = Object.keys(vote_data);
     const resultPile = [];
     const buttonPile = [];
     if (alreadyVote) {
       // 结果显示组
-      voteData.map((voteSingle,index)=>{
-        resultPile.push(index==yourVoteIndex?(
-          <div key={nanoid()} className="div-shell" style={{borderColor:"#ffe5d8"}}>
-            <div className="div-background"></div>
-            <div className="div-votedOptionBar" style={{width:eachNums[index]/totalCount*100 + '%'}}></div>
-            <div className="div-text">
-              <p className="p-voteDataShow" style={{left:"0.5em",fontSize:voteSingle.length>18?("12px"):("14px")}}>{voteSingle}</p>
-              <p className="p-voteDataShow-right" style={{right:"0.5em",fontSize:eachNums[index]>999?("12px"):("14px")}}>{eachNums[index]}</p>
-              <span className="liu_area"></span>
+      voteData.map((voteSingle, index) => {
+        resultPile.push(
+          index == yourVoteIndex ? (
+            <div
+              key={nanoid()}
+              className="div-shell"
+              style={{ borderColor: '#ffe5d8' }}
+            >
+              <div className="div-background"></div>
+              <div
+                className="div-votedOptionBar"
+                style={{ width: (eachNums[index] / totalCount) * 100 + '%' }}
+              ></div>
+              <div className="div-text">
+                <p
+                  className="p-voteDataShow"
+                  style={{
+                    left: '0.5em',
+                    fontSize: voteSingle.length > 18 ? '12px' : '14px',
+                  }}
+                >
+                  {voteSingle}
+                </p>
+                <p
+                  className="p-voteDataShow-right"
+                  style={{
+                    right: '0.5em',
+                    fontSize: eachNums[index] > 999 ? '12px' : '14px',
+                  }}
+                >
+                  {eachNums[index]}
+                </p>
+                <span className="liu_area"></span>
+              </div>
             </div>
-          </div>
-        ):(
-          <div key={nanoid()} className="div-shell">
-            <div className="div-background"></div>
-            <div className="div-optionBar" style={{width:eachNums[index]/totalCount*100 + '%',display:eachNums[index]==0?("none"):("inline")}}></div>
-            <div className="div-text">
-              <p className="p-voteDataShow" style={{left:"0.5em",fontSize:voteSingle.length>18?("12px"):("14px")}}>{voteSingle}</p>
-              <p className="p-voteDataShow-right" style={{right:"0.5em",fontSize:eachNums[index]>999?("12px"):("14px")}}>{eachNums[index]}</p>
-              <span className="liu_area"></span>
+          ) : (
+            <div key={nanoid()} className="div-shell">
+              <div className="div-background"></div>
+              <div
+                className="div-optionBar"
+                style={{
+                  width: (eachNums[index] / totalCount) * 100 + '%',
+                  display: eachNums[index] == 0 ? 'none' : 'inline',
+                }}
+              ></div>
+              <div className="div-text">
+                <p
+                  className="p-voteDataShow"
+                  style={{
+                    left: '0.5em',
+                    fontSize: voteSingle.length > 18 ? '12px' : '14px',
+                  }}
+                >
+                  {voteSingle}
+                </p>
+                <p
+                  className="p-voteDataShow-right"
+                  style={{
+                    right: '0.5em',
+                    fontSize: eachNums[index] > 999 ? '12px' : '14px',
+                  }}
+                >
+                  {eachNums[index]}
+                </p>
+                <span className="liu_area"></span>
+              </div>
             </div>
-          </div>)
+          ),
         );
-      })
-    }else{
+      });
+    } else {
       // 投票按钮组
-      voteData.map((voteSingle,index)=>{
+      voteData.map((voteSingle, index) => {
         buttonPile.push(
           <button
             className="voteButton"
             key={index}
-            onClick={(event)=>{
-              this.sendVoteOption(event.target.innerText)}
-            }
+            onClick={(event) => {
+              this.sendVoteOption(event.target.innerText);
+            }}
           >
             {voteSingle}
-          </button>
+          </button>,
         );
-      })
+      });
     }
     if (loading) {
-      return (
-        <p className="box box-tip">投票中……</p>
-      )
+      return <p className="box box-tip">投票中……</p>;
     }
-    return(
+    return (
       <div>
-        <hr/>
+        <hr />
         <div className="voteGroupPanel">
-          {alreadyVote ? (
-            <div>{resultPile}</div>
-          ):(
-            <div>{buttonPile}</div>
-          )}
+          {alreadyVote ? <div>{resultPile}</div> : <div>{buttonPile}</div>}
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -612,10 +663,18 @@ class FlowItem extends PureComponent {
         `（${format_time(new Date(this.props.info.timestamp * 1000))} ${
           this.props.info.likenum
         }关注 ${this.props.info.reply}回复）\n` +
+        `投票：\n${
+          this.props.info.vote
+            ? this.props.info.vote.vote_options.map((v) => v).join('\n')
+            : ''
+        }\n` +
         this.props.replies
           .map(
             (r) =>
               (r.tag ? '【' + r.tag + '】' : '') +
+              '[' +
+              r.name +
+              '] ' +
               r.text +
               (r.type === 'image' ? ' [图片]' : ''),
           )
@@ -625,7 +684,7 @@ class FlowItem extends PureComponent {
 
   render() {
     let props = this.props;
-    let voteOptionNum = Object.keys(props.info.vote).length
+    let voteOptionNum = Object.keys(props.info.vote).length;
     return (
       <div className={'flow-item' + (props.is_quote ? ' flow-item-quote' : '')}>
         {!!props.is_quote && (
@@ -682,7 +741,7 @@ class FlowItem extends PureComponent {
             )}
           </div>
           {voteOptionNum !== 0 && (
-            <VoteShowBox 
+            <VoteShowBox
               voteOptions={props.info.vote}
               // voteOptions={{vote_data:{第一个选项:300,第二个选项第二个选项:200,第三个选项第三个选项第三个选项:400,第四个选项第四个选项第四个选项:1000},voted:"第四个选项第四个选项第四个选项"}}
               pid={props.info.pid}
@@ -715,10 +774,11 @@ class FlowSidebar extends PureComponent {
     this.color_picker = props.color_picker;
     this.syncState = props.sync_state || (() => {});
     this.reply_ref = React.createRef();
+    this.reply_to_ref = { reply_to: -1 };
   }
-  componentDidMount(){
+  componentDidMount() {
     if (this.props.freshFirst) {
-      this.load_replies()
+      this.load_replies();
     }
   }
   set_variant(cid, variant) {
@@ -834,7 +894,8 @@ class FlowSidebar extends PureComponent {
     }));
   }
 
-  show_reply_bar(name, event) {
+  show_reply_bar(name, reply_to, event) {
+    this.reply_to_ref.reply_to = reply_to;
     if (
       this.reply_ref.current &&
       !event.target.closest('a, .clickable, .interactive')
@@ -880,11 +941,11 @@ class FlowSidebar extends PureComponent {
       this.state.filter_name && this.state.filter_name !== DZ_NAME ? null : (
         <ClickHandler
           callback={(e) => {
-            this.show_reply_bar('', e);
+            this.show_reply_bar('', -1, e);
           }}
         >
           <FlowItem
-            token = {this.props.token}
+            token={this.props.token}
             info={this.state.info}
             in_sidebar={true}
             color_picker={this.color_picker}
@@ -1014,7 +1075,7 @@ class FlowSidebar extends PureComponent {
           >
             <ClickHandler
               callback={(e) => {
-                this.show_reply_bar(reply.name, e);
+                this.show_reply_bar(reply.name, reply.cid, e);
               }}
             >
               <Reply
@@ -1077,6 +1138,7 @@ class FlowSidebar extends PureComponent {
             token={this.props.token}
             action={'docomment'}
             area_ref={this.reply_ref}
+            reply_to_ref={this.reply_to_ref}
             on_complete={this.load_replies.bind(this)}
           />
         ) : (
@@ -1106,13 +1168,13 @@ class FlowItemRow extends PureComponent {
   constructor(props) {
     super(props);
     this.needFold =
-      process.env.REACT_APP_FOLD_TAGS.indexOf(props.info.tag) > -1 &&
+      process.env.REACT_APP_FOLD_TAGS.split(',').indexOf(props.info.tag) > -1 &&
       (props.search_param === '热榜' || !props.search_param) &&
       !ADMIN_COMMANDS.includes(props.search_param) &&
       window.config.fold &&
       !props.info.attention;
     this.state = {
-      freshFirst:false,
+      freshFirst: false,
       replies: props.replies || [],
       reply_status: 'done',
       reply_error: null,
@@ -1123,19 +1185,34 @@ class FlowItemRow extends PureComponent {
         ) || this.needFold,
     };
     this.color_picker = this.props.color_picker || new ColorPicker();
-    this.pubSubToken = PubSub.subscribe('VoteDoneClickFreshSideBarFirst', this.hanldeFreashForVote.bind(this));
+    this.pubSubToken = PubSub.subscribe(
+      'VoteDoneClickFreshSideBarFirst',
+      this.handleFreshForVote.bind(this),
+    );
   }
-  hanldeFreashForVote(msg,data){
+  handleFreshForVote(msg, data) {
     if (this.props.info.pid == data) {
-      this.setState({freshFirst:true})
+      this.setState({ freshFirst: true });
     }
   }
-  componentWillUnmount(){
+  componentWillUnmount() {
     PubSub.unsubscribe(this.pubSubToken);
   }
   componentDidMount() {
-    if (this.state.info.reply && this.state.replies.length === 0) {
+    if (
+      this.state.info.reply &&
+      this.state.replies.length === 0 &&
+      !this.state.info.comments
+    ) {
       this.load_replies(null, /*update_post=*/ false);
+    } else if (this.state.info.comments) {
+      this.setState({
+        replies: this.state.info.comments.map((info) => {
+          info._display_color = this.color_picker.get(info.name);
+          return info;
+        }),
+        freshFirst: this.state.info.comments.length !== this.state.info.reply,
+      });
     }
   }
 
@@ -1307,17 +1384,17 @@ class FlowItemRow extends PureComponent {
           'flow-item-row flow-item-row-with-prompt' +
           (this.props.is_quote ? ' flow-item-row-quote' : '')
         }
-        onClick={(e) => { 
-          if (!CLICKABLE_TAGS[e.target.tagName.toLowerCase()]){
+        onClick={(e) => {
+          if (!CLICKABLE_TAGS[e.target.tagName.toLowerCase()]) {
             // 如果需要售出刷新就发送信号
             if (this.state.freshFirst) {
               this.show_sidebar(true);
-              this.setState({freshFirst:false})
-            }else{
+              this.setState({ freshFirst: false });
+            } else {
               this.show_sidebar(false);
             }
           }
-          }}
+        }}
       >
         <FlowItem
           info={this.state.info}
@@ -1328,7 +1405,7 @@ class FlowItemRow extends PureComponent {
           show_pid={show_pid}
           replies={this.state.replies}
           set_variant={(v) => {}}
-          token = {this.props.token}
+          token={this.props.token}
           header_badges={
             <>
               {!!this.state.info.likenum && (
@@ -1370,9 +1447,9 @@ class FlowItemRow extends PureComponent {
             </div>
           )}
           {showing_replies}
-          {this.state.replies.length > shown_results && (
+          {this.state.info.reply > shown_results && (
             <div className="box box-tip">
-              还有 {this.state.replies.length - shown_results} 条
+              还有 {this.state.info.reply - shown_results} 条
             </div>
           )}
         </div>
@@ -1625,6 +1702,16 @@ export class Flow extends PureComponent {
               }
             }
             const finished = json.data.length === 0;
+            json.data.forEach((item, ind) => {
+              let comments = json.comments[item.pid];
+              if (!comments) {
+                comments = [];
+              }
+              json.data[ind].comments = comments;
+              json.data[ind].comments.forEach((item) => {
+                item.variant = {};
+              });
+            });
             this.setState((prev, props) => ({
               chunks: {
                 title: 'News Feed',
@@ -1649,6 +1736,17 @@ export class Flow extends PureComponent {
         API.get_search(page, this.state.search_param, this.props.token)
           .then((json) => {
             const finished = json.data.length === 0;
+
+            json.data.forEach((item, ind) => {
+              let comments = json.comments[item.pid];
+              if (!comments) {
+                comments = [];
+              }
+              json.data[ind].comments = comments;
+              json.data[ind].comments.forEach((item) => {
+                item.variant = {};
+              });
+            });
             this.setState((prev, props) => ({
               chunks: {
                 title: 'Result for "' + this.state.search_param + '"',

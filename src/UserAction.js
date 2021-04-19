@@ -6,7 +6,7 @@ import {
   BrowserWarningBar,
 } from './Common';
 import { MessageViewer } from './Message';
-import { LoginPopup } from './old_infrastructure/widgets';
+import { LoginPopup } from './login';
 import { ColorPicker } from './color_picker';
 import { ConfigUI } from './Config';
 import fixOrientation from 'fix-orientation';
@@ -30,7 +30,7 @@ const MAX_IMG_FILESIZE = 450000 * BASE64_RATE;
 
 export const TokenCtx = React.createContext({
   value: null,
-  set_value: () => { },
+  set_value: () => {},
 });
 
 export function DoUpdate(clear_cache = true) {
@@ -55,6 +55,21 @@ export function InfoSidebar(props) {
       <BrowserWarningBar />
       <LoginForm show_sidebar={props.show_sidebar} />
       <div className="box list-menu">
+        <a href={process.env.REACT_APP_RULES_URL} target="_blank">
+          <span className="icon icon-textfile" />
+          <label>树洞规范</label>
+        </a>
+        &nbsp;&nbsp;
+        <a href={process.env.REACT_APP_TOS_URL} target="_blank">
+          <span className="icon icon-textfile" />
+          <label>服务协议</label>
+        </a>
+        &nbsp;&nbsp;
+        <a href={process.env.REACT_APP_PRIVACY_URL} target="_blank">
+          <span className="icon icon-textfile" />
+          <label>隐私政策</label>
+        </a>
+        <br />
         <a
           onClick={() => {
             props.show_sidebar('设置', <ConfigUI />);
@@ -62,11 +77,6 @@ export function InfoSidebar(props) {
         >
           <span className="icon icon-settings" />
           <label>设置</label>
-        </a>
-        &nbsp;&nbsp;
-        <a href={process.env.REACT_APP_RULES_URL} target="_blank">
-          <span className="icon icon-textfile" />
-          <label>树洞规范</label>
         </a>
         &nbsp;&nbsp;
         <a href={process.env.REACT_APP_GITHUB_ISSUES_URL} target="_blank">
@@ -143,14 +153,14 @@ export function InfoSidebar(props) {
 }
 
 export class LoginForm extends Component {
-  copy_token(token) {
-    if (copy(token))
-      alert(
-        '复制成功！\n请一定不要泄露给其他人，或在' +
-        process.env.REACT_APP_WEBSITE_URL +
-        '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
-      );
-  }
+  // copy_token(token) {
+  //   if (copy(token))
+  //     alert(
+  //       '复制成功！\n请一定不要泄露给其他人，或在' +
+  //         process.env.REACT_APP_WEBSITE_URL +
+  //         '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
+  //     );
+  // }
 
   render() {
     return (
@@ -165,7 +175,25 @@ export class LoginForm extends Component {
                     <button
                       type="button"
                       onClick={() => {
-                        token.set_value(null);
+                        fetch(
+                          API_ROOT + 'security/logout?' + API_VERSION_PARAM(),
+                          {
+                            method: 'POST',
+                            headers: {
+                              TOKEN: token.value,
+                            },
+                          },
+                        )
+                          .then(get_json)
+                          .then((json) => {
+                            if (json.code !== 0) throw new Error(json.msg);
+                            token.set_value(null);
+                          })
+                          .catch((err) => {
+                            console.error(err);
+                            alert('' + err);
+                            token.set_value(null);
+                          });
                       }}
                     >
                       <span className="icon icon-logout" /> 注销
@@ -186,14 +214,14 @@ export class LoginForm extends Component {
                     <br />
                     当您发送的内容违规时，我们将用系统消息提示您
                   </p>
-                  <p>
-                    <a onClick={this.copy_token.bind(this, token.value)}>
-                      复制 User Token
-                    </a>
-                    <br />
-                    复制 User Token
-                    可以在新设备登录，切勿告知他人。若怀疑被盗号请重新邮箱验证码登录以重置Token。
-                  </p>
+                  {/*<p>*/}
+                  {/*  <a onClick={this.copy_token.bind(this, token.value)}>*/}
+                  {/*    复制 User Token*/}
+                  {/*  </a>*/}
+                  {/*  <br />*/}
+                  {/*  复制 User Token*/}
+                  {/*  可以在新设备登录，切勿告知他人。若怀疑被盗号请重新邮箱验证码登录以重置Token。*/}
+                  {/*</p>*/}
                 </div>
               ) : (
                 <LoginPopup token_callback={token.set_value}>
@@ -201,18 +229,20 @@ export class LoginForm extends Component {
                     <div>
                       <p>
                         <button type="button" onClick={do_popup}>
-                          <span className="icon icon-login" />&nbsp;登录
+                          <span className="icon icon-login" />
+                          &nbsp;登录
                         </button>
                       </p>
                       <p>
                         <small>
-                          {process.env.REACT_APP_TITLE}面向T大学生，通过T大邮箱验证您的身份并提供服务。
+                          {process.env.REACT_APP_TITLE}
+                          面向T大学生，通过T大邮箱验证您的身份并提供服务。
                         </small>
                       </p>
                     </div>
                   )}
                 </LoginPopup>
-                )}
+              )}
             </div>
           </div>
         )}
@@ -221,37 +251,40 @@ export class LoginForm extends Component {
   }
 }
 
-export class VoteEditBox extends Component{
-  constructor(props){
-    super(props)
-    this.onChangeCheckAndSend = this.checkAndSend.bind(this)
+export class VoteEditBox extends Component {
+  constructor(props) {
+    super(props);
+    this.onChangeCheckAndSend = this.checkAndSend.bind(this);
   }
-  checkAndSend(order){
-    return (value)=>{
-      const {sendVoteData} = this.props
-      sendVoteData({[order]:value})
-    }
+  checkAndSend(order) {
+    return (value) => {
+      const { sendVoteData } = this.props;
+      sendVoteData({ [order]: value });
+    };
   }
-  render(){
-    let {num} = this.props
+  render() {
+    let { num } = this.props;
     const inputPile = [];
-    for (let i = 0; i < num; i+=1) {
+    for (let i = 0; i < num; i += 1) {
       inputPile.push(
-        <input 
-          key={i} 
+        <input
+          key={i}
           maxLength="15"
-          style={{padding:'0 2px',margin:'2px 2px'}} 
-          onChange={(event)=>{this.onChangeCheckAndSend(i+1)(event.target.value)}} 
-          placeholder={i+1}/>          
+          style={{ padding: '0 2px', margin: '2px 2px' }}
+          onChange={(event) => {
+            this.onChangeCheckAndSend(i + 1)(event.target.value);
+          }}
+          placeholder={i + 1}
+        />,
       );
     }
     return (
       <div>
-        <hr/>
+        <hr />
         <p>设置2~4个选项，每项不超过15字符</p>
         {inputPile}
       </div>
-    )
+    );
   }
 }
 
@@ -263,10 +296,10 @@ export class PostForm extends Component {
       loading_status: 'done',
       img_tip: null,
       preview: false,
-      vote:false,
+      vote: false,
       voteOptionNum: 0,
-      voteData: {1:null,2:null,3:null,4:null},
-      tag:"可选标签",
+      voteData: { 1: null, 2: null, 3: null, 4: null },
+      tag: '可选标签',
     };
     this.img_ref = React.createRef();
     this.area_ref = this.props.area_ref || React.createRef();
@@ -312,28 +345,29 @@ export class PostForm extends Component {
     let path;
     if (this.props.action === 'docomment') {
       data.append('pid', this.props.pid);
+      data.append('reply_to_cid', this.props.reply_to_ref.reply_to);
       path = 'send/comment?';
     } else {
       path = 'send/post?';
     }
     data.append('text', this.state.text);
     data.append('type', img ? 'image' : 'text');
-    if (this.state.tag!=='可选标签') {
+    if (this.state.tag !== '可选标签') {
       data.append('tag', this.state.tag);
     }
     if (img) data.append('data', img);
     // 投票
     if (this.state.vote) {
-      let voteObj = this.state.voteData
-      Object.keys(voteObj).forEach(item=>{
-        if(!voteObj[item])  delete voteObj[item]
-      })
-      let voteArray = Object.values(voteObj)
-      voteArray.map((char)=>{
+      let voteObj = this.state.voteData;
+      Object.keys(voteObj).forEach((item) => {
+        if (!voteObj[item]) delete voteObj[item];
+      });
+      let voteArray = Object.values(voteObj);
+      voteArray.map((char) => {
         data.append('vote_options[]', char);
-      })
+      });
     }
-    
+
     // fetch发送
     fetch(API_ROOT + path + API_VERSION_PARAM(), {
       method: 'POST',
@@ -460,7 +494,8 @@ export class PostForm extends Component {
             .then((d) => {
               this.setState({
                 img_tip:
-                  `（${d.compressed ? '压缩到' : '尺寸'} ${d.width}*${d.height
+                  `（${d.compressed ? '压缩到' : '尺寸'} ${d.width}*${
+                    d.height
                   } / ` +
                   `质量 ${Math.floor(d.quality * 100)}% / ${Math.floor(
                     d.img.length / BASE64_RATE / 1000,
@@ -512,27 +547,22 @@ export class PostForm extends Component {
   }
 
   addVote() {
-    let { voteOptionNum } = this.state
+    let { voteOptionNum } = this.state;
     if (voteOptionNum >= 4) {
-      alert('最大支持4个选项')
+      alert('最大支持4个选项');
     } else if (voteOptionNum == 0) {
-      voteOptionNum = 2
+      voteOptionNum = 2;
     } else {
-      voteOptionNum++
+      voteOptionNum++;
     }
-    this.setState({ voteOptionNum })
+    this.setState({ voteOptionNum });
   }
 
   render() {
-    const { vote } = this.state
+    const { vote } = this.state;
     let replyClassName =
       'reply-form box' + (this.state.text ? ' reply-sticky' : '');
-    var tagsArray = process.env.REACT_APP_SENDABLE_TAGS.split('\\\"');
-    let tagsArrayAfter = tagsArray.filter((tag) =>{
-      if (tag !== '[' && tag !== ']' && tag !== ',') {        
-        return tag
-      }
-    })
+    let tagsArrayAfter = process.env.REACT_APP_SENDABLE_TAGS.split(',');
     return (
       <form
         onSubmit={this.on_submit.bind(this)}
@@ -556,25 +586,31 @@ export class PostForm extends Component {
             />
           </label>
           {/* 发起投票，不可在评论区发送投票*/}
-          {this.props.action==='dopost' ? (
-            !vote ?(
+          {this.props.action === 'dopost' ? (
+            !vote ? (
               <button
                 type="button"
-                onClick={() => { this.setState({vote:true,voteOptionNum:2}); }}
+                onClick={() => {
+                  this.setState({ vote: true, voteOptionNum: 2 });
+                }}
               >
                 <span className="icon icon-how_to_vote" />
                 &nbsp;投票
               </button>
             ) : (
-              <button 
+              <button
                 type="button"
-                onClick={() => { this.addVote() }}
+                onClick={() => {
+                  this.addVote();
+                }}
               >
                 <span className="icon icon-how_to_vote" />
                 &nbsp;添加
               </button>
             )
-          ):(<div></div>)}
+          ) : (
+            <div></div>
+          )}
           {this.state.preview ? (
             <button
               type="button"
@@ -587,14 +623,15 @@ export class PostForm extends Component {
             </button>
           ) : (
             <button
-            type="button"
-            onClick={() => {
-              this.toggle_preview();
-            }}>
+              type="button"
+              onClick={() => {
+                this.toggle_preview();
+              }}
+            >
               <span className="icon icon-eye" />
-            &nbsp;预览
+              &nbsp;预览
             </button>
-            )}
+          )}
           {this.state.loading_status !== 'done' ? (
             <button disabled="disabled">
               <span className="icon icon-loading" />
@@ -630,7 +667,7 @@ export class PostForm extends Component {
             <HighlightedMarkdown
               text={this.state.text}
               color_picker={this.color_picker}
-              show_pid={() => { }}
+              show_pid={() => {}}
             />
           </div>
         ) : (
@@ -640,14 +677,15 @@ export class PostForm extends Component {
             on_change={this.on_change_bound}
             on_submit={this.on_submit.bind(this)}
           />
-          )}
+        )}
         {this.state.voteOptionNum !== 0 && (
-          <VoteEditBox 
-            num={this.state.voteOptionNum} 
-            sendVoteData={(voteDataObj)=>{
-              let preVoteData=this.state.voteData; 
-              Object.assign(preVoteData,voteDataObj);
-              this.setState({voteData:preVoteData});}}
+          <VoteEditBox
+            num={this.state.voteOptionNum}
+            sendVoteData={(voteDataObj) => {
+              let preVoteData = this.state.voteData;
+              Object.assign(preVoteData, voteDataObj);
+              this.setState({ voteData: preVoteData });
+            }}
           />
         )}
         {this.props.action === 'dopost' && (
@@ -658,8 +696,11 @@ export class PostForm extends Component {
                 树洞规范
               </a>
               &nbsp;
-              <span style={{float:"right"}}>
-                <select className="selectCss" onChange={e=>this.setState({tag:e.target.value})}>
+              <span style={{ float: 'right' }}>
+                <select
+                  className="selectCss"
+                  onChange={(e) => this.setState({ tag: e.target.value })}
+                >
                   <option className="selectOption">可选标签</option>
                   {tagsArrayAfter.map((tag, i) => (
                     <option className="selectOption" key={i} value={tag}>
