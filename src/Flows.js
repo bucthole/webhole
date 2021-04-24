@@ -663,9 +663,10 @@ class FlowItem extends PureComponent {
         `（${format_time(new Date(this.props.info.timestamp * 1000))} ${
           this.props.info.likenum
         }关注 ${this.props.info.reply}回复）\n` +
-        `投票：\n${
+        `${
           this.props.info.vote && this.props.info.vote.vote_options
-            ? this.props.info.vote.vote_options.map((v) => v).join('\n')
+            ? '\n【投票】：' +
+              this.props.info.vote.vote_options.map((v) => v).join('\n')
             : ''
         }\n` +
         this.props.replies
@@ -1462,7 +1463,7 @@ class FlowItemRow extends PureComponent {
           className="flow-item-row flow-item-row-with-prompt"
           onClick={(event) => {
             if (!CLICKABLE_TAGS[event.target.tagName.toLowerCase()])
-              this.show_sidebar();
+              this.show_sidebar(this.state.freshFirst);
           }}
         >
           <div
