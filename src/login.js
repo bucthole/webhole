@@ -1,18 +1,14 @@
-import React, { Component, PureComponent } from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-
-import TimeAgo from 'react-timeago';
-import chineseStrings from 'react-timeago/lib/language-strings/zh-CN';
-import buildFormatter from 'react-timeago/lib/formatters/buildFormatter';
 
 import './login.css';
 
 import { API_ROOT } from './old_infrastructure/const';
-import { get_json, API_VERSION_PARAM } from './old_infrastructure/functions';
+import { API_VERSION_PARAM, get_json } from './old_infrastructure/functions';
 
 import {
-  GoogleReCaptchaProvider,
   GoogleReCaptcha,
+  GoogleReCaptchaProvider,
 } from 'react-google-recaptcha-v3';
 import ReCAPTCHA from 'react-google-recaptcha';
 
@@ -102,10 +98,7 @@ class LoginPopupSelf extends Component {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
 
     // convert bytes to hex string
-    const hashHex = hashArray
-      .map((b) => ('00' + b.toString(16)).slice(-2))
-      .join('');
-    return hashHex;
+    return hashArray.map((b) => ('00' + b.toString(16)).slice(-2)).join('');
   }
 
   async hashpassword(password) {
@@ -530,7 +523,7 @@ export class LoginPopup extends Component {
   }
 }
 
-class RecaptchaV2Popup extends Component {
+export class RecaptchaV2Popup extends Component {
   constructor(props, context) {
     super(props, context);
     this.onChange = this.onChange.bind(this);

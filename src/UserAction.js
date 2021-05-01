@@ -22,6 +22,7 @@ import {
 } from './flows_api';
 
 import './UserAction.css';
+import { UnregisterPopup } from './delete_account';
 
 const BASE64_RATE = 4 / 3;
 const MAX_IMG_DIAM = 8000;
@@ -83,6 +84,15 @@ export function InfoSidebar(props) {
           <span className="icon icon-github" />
           <label>意见反馈</label>
         </a>
+        <br />
+        <UnregisterPopup>
+          {(do_popup) => (
+            <a onClick={do_popup}>
+              <span className="icon icon-refresh" />
+              <label>注销账户/找回密码</label>
+            </a>
+          )}
+        </UnregisterPopup>
       </div>
       <div className="box help-desc-box">
         <p>
