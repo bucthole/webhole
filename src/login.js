@@ -365,8 +365,7 @@ class LoginPopupSelf extends Component {
                   <a
                     onClick={() => {
                       alert(
-                        '忘记密码？请联系' +
-                          process.env.REACT_APP_CONTACT_EMAIL,
+                        '在树洞网页版的“账户”界面，可以注销账号之后重新注册树洞。',
                       );
                     }}
                   >
