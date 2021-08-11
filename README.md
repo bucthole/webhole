@@ -1,10 +1,10 @@
-网页版 T大树洞：[https://thuhole.com/](https://thuhole.com/)
+网页版 北化树洞：[https://bucthole.com/](https://bucthole.com/)
 
-![https://api.travis-ci.org/thuhole/webhole.svg?branch=master](https://api.travis-ci.org/thuhole/webhole.svg?branch=master)
+![https://api.travis-ci.org/bucthole/webhole.svg?branch=master](https://api.travis-ci.org/bucthole/webhole.svg?branch=master)
 
 ## 安装方式
 ```bash
-git clone https://github.com/thuhole/webhole
+git clone https://github.com/bucthole/webhole
 cd webhole
 git submodule update --init --recursive
 
@@ -16,7 +16,7 @@ VERSION_NUMBER="v$(grep -oP '"version": "\K[^"]+' package.json | head -n1)"
 REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 ```
 
-后端安装方式请见 [thuhole/thuhole-go-backend](https://github.com/thuhole/thuhole-go-backend )。
+后端安装方式请见 [bucthole/bucthole-go-backend](https://github.com/bucthole/bucthole-go-backend )。
 
 ## CDN说明
 
@@ -25,7 +25,7 @@ REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 
 ## 浏览器兼容
 
-下表为当前 T大树洞 网页版的浏览器兼容目标：
+下表为当前 北化树洞 网页版的浏览器兼容目标：
 
 | 平台     | Desktop |                            |         | Windows  |      | macOS  | iOS    |                     | Android |                         |
 | -------- | ------- | -------------------------- | ------- | -------- | ---- | ------ | ------ | ------------------- | ------- | ----------------------- |
@@ -45,13 +45,13 @@ REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 
 ## 问题反馈
 
-对 T大树洞 网页版的 bug 反馈请在相应仓库提交 Issue。
+对 北化树洞 网页版的 bug 反馈请在相应仓库提交 Issue。
 
 欢迎提出功能和 UI 建议，但可能不会被采纳。根据 GPL，你有权自行实现你的想法。
 
-不方便在 GitHub 上说明的问题可以邮件 contact@thuhole.com。邮件内容可能会被公开。
+不方便在 GitHub 上说明的问题可以邮件 contact@bucthole.com。邮件内容可能会被公开。
 
-对 T大树洞 后端服务、账号、树洞内容的反馈请联系邮件 contact@thuhole.com。
+对 北化树洞 后端服务、账号、树洞内容的反馈请联系邮件 contact@bucthole.com。
 
 ## branch说明：
 - master branch: 主分支

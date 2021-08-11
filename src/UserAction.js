@@ -14,7 +14,7 @@ import copy from 'copy-to-clipboard';
 import { cache } from './cache';
 import {
   // API_VERSION_PARAM,
-  // THUHOLE_API_ROOT,
+  // BUCTHOLE_API_ROOT,
   // API,
   get_json,
   API_ROOT,
@@ -246,7 +246,7 @@ export class LoginForm extends Component {
                       <p>
                         <small>
                           {process.env.REACT_APP_TITLE}
-                          面向T大学生，通过T大邮箱验证您的身份并提供服务。
+                          面向北化学生，通过北化邮箱验证您的身份并提供服务。
                         </small>
                       </p>
                     </div>

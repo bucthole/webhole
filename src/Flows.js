@@ -51,8 +51,8 @@ const ADMIN_COMMANDS = [
 import { cache } from './cache';
 
 // const process.env.REACT_APP_IMG_BASE_URL = 'https://thimg.yecdn.com/';
-// const process.env.REACT_APP_IMG_BASE_BAK_URL = 'https://img2.thuhole.com/';
-// const AUDIO_BASE=THUHOLE_API_ROOT+'services/thuhole/audios/';
+// const process.env.REACT_APP_IMG_BASE_BAK_URL = 'https://img2.bucthole.com/';
+// const AUDIO_BASE=BUCTHOLE_API_ROOT+'services/bucthole/audios/';
 
 const CLICKABLE_TAGS = { a: true, audio: true, button: true };
 const PREVIEW_REPLY_COUNT = 10;

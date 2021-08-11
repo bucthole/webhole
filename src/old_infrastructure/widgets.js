@@ -102,7 +102,7 @@ export function GlobalTitle(props) {
 //   fix: {},
 // };
 // const SWITCHER_DATA_VER='switcher_2';
-// const SWITCHER_DATA_URL=THUHOLE_API_ROOT+'web_static/appswitcher_items.json';
+// const SWITCHER_DATA_URL=BUCTHOLE_API_ROOT+'web_static/appswitcher_items.json';
 
 // export class AppSwitcher extends Component {
 //     constructor(props) {
@@ -518,7 +518,7 @@ export function GlobalTitle(props) {
 //                   ref={this.username_ref}
 //                   type="email"
 //                   autoFocus={true}
-//                   defaultValue="@mails.tsinghua.edu.cn"
+//                   defaultValue="@mail.buct.edu.cn"
 //                 />
 //               </label>
 //               <span className="treehollow-login-type">
