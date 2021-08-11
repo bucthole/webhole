@@ -21,9 +21,9 @@ const BUILTIN_IMGS = {
 };
 
 const DEFAULT_CONFIG = {
-  background_img:
-    'https://cdn.jsdelivr.net/gh/bucthole/webhole@gh-pages/static/bg/gbp.jpg',
-  background_color: '#113366',
+  // background_img:
+  //   'https://cdn.jsdelivr.net/gh/bucthole/webhole@gh-pages/static/bg/gbp.jpg',
+  background_color: '#b5d1e9',
   pressure: false,
   easter_egg: true,
   color_scheme: 'default',
