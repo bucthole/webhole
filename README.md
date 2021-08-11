@@ -1,8 +1,9 @@
-网页版 北化树洞：[https://bucthole.com/](https://bucthole.com/)
+# 网页版 北化树洞：[https://bucthole.com/](https://bucthole.com/)
 
 ![https://api.travis-ci.org/bucthole/webhole.svg?branch=master](https://api.travis-ci.org/bucthole/webhole.svg?branch=master)
 
 ## 安装方式
+
 ```bash
 git clone https://github.com/bucthole/webhole
 cd webhole
@@ -34,7 +35,6 @@ REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 | 兼容     | 56+     | 最新版                     | 56+     | 最新版   | 无   | 10+    | 10+    | 最新版              | 56+     | 最新版                  |
 | 不兼容   | 其他    | 其他                       | 其他    | 其他     | 全部 | 其他   | 其他   | 其他                | 其他    | 其他                    |
 
-
 **优先兼容** 指不应有 bug 和性能问题，可以 Polyfill 的功能尽可能提供，若发现问题会立刻修复。
 
 **兼容** 指不应有恶性 bug 和严重性能问题，若发现问题会在近期修复。
@@ -53,7 +53,8 @@ REACT_APP_BUILD_INFO=$VERSION_NUMBER npm run build
 
 对 北化树洞 后端服务、账号、树洞内容的反馈请联系邮件 contact@bucthole.com。
 
-## branch说明：
+## branch说明
+
 - master branch: 主分支
 - dev branch: 开发分支
 - gh-pages branch: dev分支的部署分支，用于测试
