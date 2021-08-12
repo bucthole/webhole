@@ -31,7 +31,7 @@ const MAX_IMG_FILESIZE = 450000 * BASE64_RATE;
 
 export const TokenCtx = React.createContext({
   value: null,
-  set_value: () => {},
+  set_value: () => { },
 });
 
 export function DoUpdate(clear_cache = true) {
@@ -163,14 +163,15 @@ export function InfoSidebar(props) {
 }
 
 export class LoginForm extends Component {
-  // copy_token(token) {
-  //   if (copy(token))
-  //     alert(
-  //       '复制成功！\n请一定不要泄露给其他人，或在' +
-  //         process.env.REACT_APP_WEBSITE_URL +
-  //         '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
-  //     );
-  // }
+
+  copy_token(token) {
+    if (copy(token))
+      alert(
+        '复制成功！\n请一定不要泄露给其他人，或在' +
+        process.env.REACT_APP_WEBSITE_URL +
+        '以外的其他网站中输入token，否则可能会导致信息泄漏哦',
+      );
+  }
 
   render() {
     return (
@@ -224,14 +225,14 @@ export class LoginForm extends Component {
                     <br />
                     当您发送的内容违规时，我们将用系统消息提示您
                   </p>
-                  {/*<p>*/}
-                  {/*  <a onClick={this.copy_token.bind(this, token.value)}>*/}
-                  {/*    复制 User Token*/}
-                  {/*  </a>*/}
-                  {/*  <br />*/}
-                  {/*  复制 User Token*/}
-                  {/*  可以在新设备登录，切勿告知他人。若怀疑被盗号请重新邮箱验证码登录以重置Token。*/}
-                  {/*</p>*/}
+                  <p>
+                    <a onClick={this.copy_token.bind(this, token.value)}>
+                      复制 User Token
+                    </a>
+                    <br />
+                    复制 User Token
+                    可以在新设备登录，切勿告知他人。若怀疑被盗号请重新邮箱验证码登录以重置Token。
+                  </p>
                 </div>
               ) : (
                 <LoginPopup token_callback={token.set_value}>
@@ -504,8 +505,7 @@ export class PostForm extends Component {
             .then((d) => {
               this.setState({
                 img_tip:
-                  `（${d.compressed ? '压缩到' : '尺寸'} ${d.width}*${
-                    d.height
+                  `（${d.compressed ? '压缩到' : '尺寸'} ${d.width}*${d.height
                   } / ` +
                   `质量 ${Math.floor(d.quality * 100)}% / ${Math.floor(
                     d.img.length / BASE64_RATE / 1000,
@@ -677,7 +677,7 @@ export class PostForm extends Component {
             <HighlightedMarkdown
               text={this.state.text}
               color_picker={this.color_picker}
-              show_pid={() => {}}
+              show_pid={() => { }}
             />
           </div>
         ) : (
