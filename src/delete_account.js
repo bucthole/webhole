@@ -101,7 +101,7 @@ class UnregisterPopupSelf extends Component {
             if (json.code === 3) failed_callback();
           })
           .catch((e) => {
-            alert('邮箱检验失败\n' + e + '\n'+ '详情请联系contact@bucthole.com');
+            alert('邮箱检验失败\n' + e + '\n'+ '详情请联系 contact@bucthole.com');
             this.setState({
               loading_status: 'done',
             });
