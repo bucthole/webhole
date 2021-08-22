@@ -23,7 +23,7 @@ const BUILTIN_IMGS = {
 const DEFAULT_CONFIG = {
   background_img:
     'https://cdn.jsdelivr.net/gh/bucthole/webhole@gh-pages/static/bg/gbp.jpg',
-  background_color: '#113366',
+  background_color: '#3072d5',
   pressure: true,
   easter_egg: true,
   color_scheme: 'default',
@@ -45,7 +45,7 @@ export function load_config() {
   // unrecognized configs are removed
   Object.keys(loaded_config).forEach((key) => {
     if (config[key] !== undefined) config[key] = loaded_config[key];
-    if (localStorage['TOKEN'] == undefined) localStorage['TOKEN'] = '0';
+    if (localStorage['TOKEN'] == undefined) localStorage['TOKEN'] = 0;
   });
 
   console.log('config loaded', config);
