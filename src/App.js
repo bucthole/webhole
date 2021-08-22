@@ -36,7 +36,7 @@ class App extends Component {
       mode: 'list', // list, single, search, attention
       search_text: null,
       flow_render_key: +new Date(),
-      token: localStorage['TOKEN'] || 0,
+      token: localStorage['TOKEN'] || null,
       override_suicide: false,
     };
     this.show_sidebar_bound = this.show_sidebar.bind(this);

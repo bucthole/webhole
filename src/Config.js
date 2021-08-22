@@ -45,9 +45,11 @@ export function load_config() {
   // unrecognized configs are removed
   Object.keys(loaded_config).forEach((key) => {
     if (config[key] !== undefined) config[key] = loaded_config[key];
+    if (localStorage['TOKEN'] == undefined) localStorage['TOKEN'] = '0';
   });
 
   console.log('config loaded', config);
+  console.log('TOKEN loaded', localStorage['TOKEN']);
   window.config = config;
 }
 export function save_config() {
@@ -113,8 +115,8 @@ class ConfigBackground extends PureComponent {
       this.state.img === null
         ? '##color'
         : Object.keys(BUILTIN_IMGS).indexOf(this.state.img) === -1
-        ? '##other'
-        : this.state.img;
+          ? '##other'
+          : this.state.img;
     return (
       <div>
         <p>
@@ -360,7 +362,7 @@ export class ConfigUI extends PureComponent {
       window.location.reload();
     }
   }
- 
+
   render() {
     return (
       <div>
@@ -436,7 +438,7 @@ export class ConfigUI extends PureComponent {
                 <HighlightedMarkdown
                   text={localStorage['hide_announcement']}
                   color_picker={this.color_picker}
-                  show_pid={() => {}}
+                  show_pid={() => { }}
                 />
                 <a
                   onClick={() => {
