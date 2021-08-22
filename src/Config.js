@@ -52,7 +52,7 @@ export function load_config() {
   window.config = config;
 
   if (localStorage['TOKEN'] == undefined || localStorage['TOKEN'] == null) {
-    localStorage['TOKEN'] = "NewUser";
+    localStorage['TOKEN'] = "0";
     console.log('TOKEN load', localStorage['TOKEN']);
   }
   if (localStorage['TOKEN'] !== undefined)
