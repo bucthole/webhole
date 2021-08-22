@@ -45,12 +45,19 @@ export function load_config() {
   // unrecognized configs are removed
   Object.keys(loaded_config).forEach((key) => {
     if (config[key] !== undefined) config[key] = loaded_config[key];
-    if (localStorage['TOKEN'] == undefined) localStorage['TOKEN'] = 0;
+
   });
 
   console.log('config loaded', config);
-  console.log('TOKEN loaded', localStorage['TOKEN']);
   window.config = config;
+
+  if (localStorage['TOKEN'] == undefined) {
+    localStorage.setItem("TOKEN", "NewUser");
+    console.log('TOKEN loaded', localStorage['TOKEN']);
+  }
+  if (localStorage['TOKEN'] !== undefined)
+    console.log('TOKEN has loaded', localStorage['TOKEN']);
+
 }
 export function save_config() {
   localStorage['hole_config'] = JSON.stringify(window.config);
