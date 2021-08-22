@@ -21,8 +21,8 @@ const BUILTIN_IMGS = {
 };
 
 const DEFAULT_CONFIG = {
-  // background_img:
-  //   'https://cdn.jsdelivr.net/gh/bucthole/webhole@gh-pages/static/bg/gbp.jpg',
+  background_img:
+    'https://cdn.jsdelivr.net/gh/bucthole/webhole@gh-pages/static/bg/gbp.jpg',
   background_color: '#113366',
   pressure: true,
   easter_egg: true,
@@ -360,7 +360,7 @@ export class ConfigUI extends PureComponent {
       window.location.reload();
     }
   }
-
+ 
   render() {
     return (
       <div>
