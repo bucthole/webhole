@@ -51,9 +51,11 @@ export function load_config() {
   console.log('config loaded', config);
   window.config = config;
 
-  if (localStorage['TOKEN'] == undefined ||localStorage['TOKEN'] == null) {
-    localStorage.setItem("TOKEN", "NewUser");
-    console.log('TOKEN loaded', localStorage['TOKEN']);
+  localStorage['TOKEN'] = "NewUser";
+  
+  if (localStorage['TOKEN'] == undefined || localStorage['TOKEN'] == null) {
+    localStorage['TOKEN'] = "NewUser";
+    console.log('TOKEN load', localStorage['TOKEN']);
   }
   if (localStorage['TOKEN'] !== undefined)
     console.log('TOKEN has loaded', localStorage['TOKEN']);
