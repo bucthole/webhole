@@ -1,4 +1,4 @@
-# 网页版 北化树洞：[https://bucthole.com/](https://bucthole.com/)
+# 网页版 北化树洞：[https://bucthole.com/](https://bucthole.com/) 免登录版
 
 ![https://api.travis-ci.org/bucthole/webhole.svg?branch=master](https://api.travis-ci.org/bucthole/webhole.svg?branch=master)
 
